@@ -1,9 +1,11 @@
 import { atom, selector } from 'recoil'
 import { UserWithToken } from '../global'
 
+export const initialUserValue: UserWithToken = { username: '', id: 0, token: '', isVeryfied: false, refreshToken: '' }
+
 export const userState = atom<UserWithToken>({
   key: 'userState',
-  default: { username: '', id: 0, token: '', isVeryfied: false },
+  default: initialUserValue,
 })
 
 export const isAuthenticate = selector({

@@ -2,47 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using AdriassengerApi.Data;
 using AdriassengerApi.Models;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using AdriassengerApi.Utils;
-
-public class UserData
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
-
-}
-
-public class Response<T>
-{
-    public bool Success { get; set; }   
-    public string Message { get; set; }
-    public T Data { get; set; }
-
-    public Response(bool success, string message, T data)
-    {
-        Success = success;
-        Message = message;
-        Data = data;
-    }   
-}
-
-public class UserWithToken
-{
-    public string Username { get; set; }
-    public int Id  { get; set; }
-    public string Token { get; set; }
-
-    public UserWithToken(string username, int id, string token)
-    {
-        Username = username;
-        Id = id;
-        Token = token;
-    }
-}
 
 namespace AdriassengerApi.Controllers
 {
@@ -60,46 +23,106 @@ namespace AdriassengerApi.Controllers
         }
 
         // GET: api/Users
-        [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<User>>> Getusers()
+        [HttpGet("Search")]
+  
+        public async Task<ActionResult<IEnumerable<SearchUser>>> Getusers(string searchText)
         {
           if (_context.users == null)
           {
               return NotFound();
           }
+          
+          var users = await _context.users.Where(s => s.Username!.Contains(searchText)).Select(u => new SearchUser() { Username = u.Username, Id = u.Id }).ToListAsync();
+
+          return Ok(new Response<IEnumerable<SearchUser>>(true, "Users sended", users));
+        }
+
+        // GET: api/Users
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<User>>> Getusers()
+        {
+            if (_context.users == null)
+            {
+                return NotFound();
+            }
             return await _context.users.ToListAsync();
         }
 
         // GET: api/Users/Login
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<UserWithToken>> GetUser(UserData userData)
+        public async Task<ActionResult<UserWithToken>> GetUser([FromBody] UserData userData)
         {
           if (_context.users == null)
           {
-              return NotFound();
+              return NotFound(new ValidationErrorResponse("User not found."));
           }
-            var userList = await _context.users.Where(u => u.Username == userData.Username && u.Password == userData.Password).ToListAsync();
-            if (userList.Count == 0)
+            try
             {
-                return NotFound();
-            }
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == userData.Username && u.Password == userData.Password);
+                if (user == null)
+                {
+                    return NotFound(new ValidationErrorResponse("User not found."));
+                }
 
-            var user = userList[0];
-
-            //create claims details based on the user information
-            var claims = new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                        new Claim("Id", user.Id.ToString()),
-                        new Claim("Username", user.Username),
-                        new Claim("Email", user.Email)
+                //create claims details based on the user information
+                var claims = new List<Claim> {
+                        new Claim("id", user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.Email, user.Email)
                     };
-            var token = new Token(_configuration).GetToken(claims);
+                var tokenService = new Token(_configuration);
+                var token = tokenService.GetToken(claims);
+                var refreshToken = tokenService.GenerateRefreshToken();
 
-            return Ok(new Response<UserWithToken>(true, "Succsess", new UserWithToken(user.Username, user.Id, token)));
+                user.RefreshToken = refreshToken;
+                user.RefreshExpiration = DateTime.Now.AddMinutes(5);
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new Response<UserWithToken>(true, "Succsess", new UserWithToken(user.Username, user.Id, token, refreshToken)));
+            } catch
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("refresh")]
+        public async Task<ActionResult<TokenApiModel>> Refresh(TokenApiModel tokenApiModel)
+        {
+            if (tokenApiModel is null) return BadRequest("Invalid client request");
+            string accessToken = tokenApiModel.AccessToken;
+            var tokenServices = new Token(_configuration);
+            var principal = tokenServices.GetPrincipalFromExpiredToken(accessToken);
+            if (principal == null) return BadRequest("Token is invalid");
+            var username = principal.Identity.Name; //this is mapped to the Name claim by default
+
+            try
+            {
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user is null || user.RefreshToken != tokenApiModel.RefreshToken || user.RefreshExpiration <= DateTime.Now)
+                    return BadRequest("Invalid client request");
+
+                var newAccessToken = tokenServices.GetToken(principal.Claims);
+                var newRefreshToken = tokenServices.GenerateRefreshToken();
+
+                user.RefreshToken = newRefreshToken;
+                user.RefreshExpiration = DateTime.Now.AddMinutes(5);
+
+                _context.SaveChanges();
+                return Ok(new Response<TokenApiModel>(true, "Tokens created", new TokenApiModel()
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                }));
+            }
+            catch
+            {
+                return BadRequest("Server problem");
+            }
         }
 
         // PUT: api/Users/5
@@ -136,6 +159,7 @@ namespace AdriassengerApi.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<User>> PostUser(User user)
         {
           if (_context.users == null)
