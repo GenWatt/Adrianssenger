@@ -33,7 +33,7 @@ export default function useFetch() {
     return config
   }
 
-  const notError = <T = {}>(response: BasicResponse | ApiResponse<T>): response is ApiResponse<T> => {
+  const isError = <T = {}>(response: BasicResponse | ApiResponse<T>): response is ApiResponse<T> => {
     return 'data' in response
   }
 
@@ -125,5 +125,5 @@ export default function useFetch() {
     return null
   }
 
-  return { callApi, isLoading, controller, notError }
+  return { callApi, isLoading, controller, isError }
 }

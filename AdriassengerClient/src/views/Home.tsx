@@ -8,7 +8,7 @@ import useFetch from '../hooks/useFetch'
 
 export default function Home() {
   return (
-    <Grid container display="flex">
+    <Grid container display="flex" flexWrap="nowrap" gap={1}>
       <LeftPanel />
       <Outlet />
     </Grid>

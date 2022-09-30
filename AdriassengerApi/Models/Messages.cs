@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Framework;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AdriassengerApi.Models
 {
@@ -8,12 +9,11 @@ namespace AdriassengerApi.Models
         [Required]
         public string Message { get; set; }
         [Required]
-        public int Sender { get; set; }
+        public virtual User Sender { get; set; }
         [Required]
-        public int Receiver { get; set; }
+        public virtual User Receiver { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool Seen { get; set; }
         public string FilePath { get; set; }
-
     }
 }

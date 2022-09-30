@@ -6,6 +6,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using AdriassengerApi.Utils;
+using Microsoft.AspNetCore.Identity;
+
+public class FriendWithId
+{
+    public int FriendId { get; set; }
+}
 
 namespace AdriassengerApi.Controllers
 {
@@ -39,14 +45,13 @@ namespace AdriassengerApi.Controllers
 
         // GET: api/Users
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<User>>> Getusers()
         {
             if (_context.users == null)
             {
                 return NotFound();
             }
-            return await _context.users.ToListAsync();
+            return await _context.users.Include(u => u.Friends).ToListAsync();
         }
 
         // GET: api/Users/Login
@@ -60,10 +65,15 @@ namespace AdriassengerApi.Controllers
           }
             try
             {
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == userData.Username && u.Password == userData.Password);
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == userData.Username);
                 if (user == null)
                 {
-                    return NotFound(new ValidationErrorResponse("User not found."));
+                    return BadRequest(new ValidationErrorResponse("User or password is invalid."));
+                }
+
+                if (!BCrypt.Net.BCrypt.Verify(userData.Password, user.Password))
+                {
+                    return BadRequest(new ValidationErrorResponse("User or password is invalid."));
                 }
 
                 //create claims details based on the user information
@@ -166,6 +176,8 @@ namespace AdriassengerApi.Controllers
           {
               return Problem("Entity set 'UserContext.users'  is null.");
           }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
             _context.users.Add(user);
             await _context.SaveChangesAsync();
 

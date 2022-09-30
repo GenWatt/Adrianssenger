@@ -1,7 +1,23 @@
+body {
+    overflow-y: hidden;
+}
+
 .App {
-    min-height: 100vh;
+    max-height: 100vh;
+    padding: .5rem;
 }
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.width-inherit {
+    width: inherit;
+}
+
+.ellipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
 }

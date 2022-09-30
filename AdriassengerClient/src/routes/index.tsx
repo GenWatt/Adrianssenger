@@ -6,5 +6,5 @@ import Register from '../views/Register'
 export const routes = [
   { path: '/register', element: <Register /> },
   { path: '/login', element: <Login /> },
-  { path: '/', element: <Home />, protected: true, children: [{ path: '/messages', element: <RightPanel /> }] },
+  { path: '/', element: <Home />, protected: true, children: [{ path: '/messages/:id', element: <RightPanel /> }] },
 ]

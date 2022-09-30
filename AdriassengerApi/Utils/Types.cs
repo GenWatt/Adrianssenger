@@ -8,6 +8,15 @@ namespace AdriassengerApi.Utils
 
     }
 
+    public class FriendResponse
+    {
+        public int Id{ get; set; }
+        public int FriendId { get; set; }
+        public string Username { get; set; }
+        public string LastMessage { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
     public class TokenApiModel
     {
         public string AccessToken { get; set; }

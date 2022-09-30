@@ -17,9 +17,13 @@ export interface ApiResponse<T> extends BasicResponse {
   data: T
 }
 
-export interface User {
+export interface UserHeaderData {
   username: string
   id: number
+  imgUrl: string
+}
+
+export interface User extends UserHeaderData {
   email?: string
   isVeryfied: boolean
 }
@@ -31,4 +35,15 @@ export interface UserWithToken extends User {
 
 export interface ErrorResponse<T> extends BasicResponse {
   validateData?: T
+}
+
+export interface Friend extends UserHeaderData {
+  lastMessage: string
+  friendId: number
+  createAt: Date
+}
+
+export interface SearchUser {
+  id: number
+  username: string
 }

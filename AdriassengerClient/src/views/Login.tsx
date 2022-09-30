@@ -15,7 +15,7 @@ const schema: FormSchema[] = [
 ]
 
 export default function Login() {
-  const { callApi, isLoading, notError } = useFetch()
+  const { callApi, isLoading, isError } = useFetch()
   const { convertFormDataToObject } = useForm()
   const [user, setUser] = useRecoilState(userState)
   const navigate = useNavigate()
@@ -32,7 +32,7 @@ export default function Login() {
 
     if (!res) return
 
-    if (!notError(res)) {
+    if (!isError(res)) {
       setErrorMessage(res.message)
     } else {
       setUser(res.data)

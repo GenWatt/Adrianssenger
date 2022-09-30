@@ -13,7 +13,7 @@ const schema: FormSchema[] = [
 
 export default function Register() {
   const { convertFormDataToObject } = useForm()
-  const { callApi, isLoading, notError } = useFetch()
+  const { callApi, isLoading, isError } = useFetch()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,7 +22,7 @@ export default function Register() {
 
     if (!res) return
 
-    if (notError(res)) {
+    if (!isError(res)) {
       navigate('/login')
     }
   }
