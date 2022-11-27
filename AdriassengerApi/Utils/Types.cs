@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AdriassengerApi.Models;
+using System.ComponentModel.DataAnnotations;
 namespace AdriassengerApi.Utils
 {
     public class UserData
@@ -10,9 +11,18 @@ namespace AdriassengerApi.Utils
 
     public class FriendResponse
     {
-        public int Id{ get; set; }
+
+        public FriendResponse(Friend friend, User user)
+        {
+            Id = user.Id;
+            FriendId = friend.FriendId;
+            UserName = user.UserName;
+            LastMessage = friend.LastMessage;
+            CreatedDate = friend.CreatedDate;
+        }
+        public int Id { get; set; }
         public int FriendId { get; set; }
-        public string Username { get; set; }
+        public string UserName { get; set; }
         public string LastMessage { get; set; }
         public DateTime CreatedDate { get; set; }
     }
@@ -29,7 +39,7 @@ namespace AdriassengerApi.Utils
         public string Message { get; set; }
         public T Data { get; set; }
 
-        public Response(bool success, string message, T data)
+        public Response(bool success, string message, T? data)
         {
             Success = success;
             Message = message;

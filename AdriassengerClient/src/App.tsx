@@ -1,12 +1,30 @@
 import './App.css'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { routes } from './routes'
 import ProtectedRoute from './routes/ProtectedRoute'
-import React from 'react'
+import React, { useEffect } from 'react'
+import AppBar from './components/UI/AppBar'
+import useSignalConnection from './hooks/useSignalConnection'
+
+const hideAppBarPaths = ['/login', '/register']
 
 function App() {
+  const location = useLocation()
+  const { disconnect, makeConnections, connection } = useSignalConnection()
+
+  useEffect(() => {
+    makeConnections()
+
+    return () => {
+      disconnect()
+    }
+  }, [connection])
+
+  const hideAppBar = (arr: string[]) => arr.some((e) => e === location.pathname)
+
   return (
     <div className="App">
+      {!hideAppBar(hideAppBarPaths) && <AppBar />}
       <Routes>
         {routes.map((route, index) => (
           <React.Fragment key={index}>

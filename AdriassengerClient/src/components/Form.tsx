@@ -29,7 +29,7 @@ export default function Form({ schema, header, buttonText, onSubmit, isLoading, 
   }
 
   return (
-    <Grid container display="flex" justifyContent="center" pt={20}>
+    <Grid container display="flex" justifyContent="center" p={5}>
       <Paper variant="elevation">
         <Grid minWidth={400} p={1}>
           {header && (

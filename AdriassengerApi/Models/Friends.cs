@@ -11,7 +11,8 @@ namespace AdriassengerApi.Models
         public virtual User User { get; set; }
         public int SecondUserId { set; get; }
         public virtual User SecondUser { get; set; }
-        public string? LastMessage { set; get; }
+        public string LastMessage { set; get; } = string.Empty;
+        public bool RequestAccepted { set; get; } = false;
         public DateTime CreatedDate { set; get; } = DateTime.Now;
     }
 }

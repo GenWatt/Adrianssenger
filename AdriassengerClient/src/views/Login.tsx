@@ -1,5 +1,5 @@
 import Form from '../components/Form'
-import { ApiResponse, FormSchema, UserWithToken } from '../global'
+import { FormSchema, UserHeaderData } from '../global'
 import useFetch from '../hooks/useFetch'
 import useForm from '../hooks/useFrom'
 import { userState } from '../store/user'
@@ -9,13 +9,13 @@ import { useState } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 
 const schema: FormSchema[] = [
-  { name: 'username', id: 'username', label: 'Username' },
-  { type: 'password', name: 'password', id: 'password', label: 'Password' },
+  { name: 'userName', id: 'userName', label: 'username', rules: { required: true } },
+  { type: 'password', name: 'password', id: 'password', label: 'Password', rules: { required: true } },
   { type: 'link', label: "Don't have an account? Create one!", to: '/register', name: 'link' },
 ]
 
 export default function Login() {
-  const { callApi, isLoading, isError } = useFetch()
+  const { request, isLoading, getErrorMessage } = useFetch()
   const { convertFormDataToObject } = useForm()
   const [user, setUser] = useRecoilState(userState)
   const navigate = useNavigate()
@@ -23,21 +23,17 @@ export default function Login() {
   const { setObj } = useLocalStorage()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const res = await callApi<ApiResponse<UserWithToken>>(
-      '/Users/Login',
-      'POST',
-      convertFormDataToObject(e.target as HTMLFormElement)
-    )
+    try {
+      e.preventDefault()
+      const loginData = convertFormDataToObject<{ userName: string; password: string }>(e.target as HTMLFormElement)
+      const res = await request<UserHeaderData>('/Account/Login', 'POST', loginData)
 
-    if (!res) return
-
-    if (!isError(res)) {
-      setErrorMessage(res.message)
-    } else {
       setUser(res.data)
-      setObj<UserWithToken>('user', res.data)
+      setObj<UserHeaderData>('user', res.data)
       navigate('/')
+    } catch (error) {
+      console.log(error)
+      setErrorMessage(getErrorMessage(error))
     }
   }
   return (

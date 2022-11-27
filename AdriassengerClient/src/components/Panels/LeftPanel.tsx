@@ -1,9 +1,9 @@
 import { Grid } from '@mui/material'
 import { useState } from 'react'
 import useUser from '../../hooks/useUser'
-import FriendList from './FriendList'
-import FrindOptions from './FrindOptions'
-import UserInfo from './UserInfo'
+import FriendList from '../Friends/FriendList'
+import FrindOptions from '../UserPanel/FrindOptions'
+import UserInfo from '../UserPanel/UserInfo'
 
 export default function LeftPanel() {
   const [searchText, setSearchText] = useState('')
@@ -13,7 +13,7 @@ export default function LeftPanel() {
 
   return (
     <Grid item xs={12} md={4}>
-      <UserInfo user={user} isSettings />
+      <UserInfo user={user} />
       <FrindOptions handleSearch={handleSearchFriend} searchText={searchText} />
       <FriendList searchText={searchText} />
     </Grid>

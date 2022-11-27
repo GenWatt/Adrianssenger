@@ -2,7 +2,7 @@ import { Grid, TextField, Tooltip } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
 import React, { useState } from 'react'
-import AddFriendDialog from './AddFriendDialog'
+import AddFriendDialog from '../Friends/AddFriendDialog'
 
 interface Props {
   handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void

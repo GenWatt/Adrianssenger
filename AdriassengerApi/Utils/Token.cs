@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
+﻿using AdriassengerApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -9,23 +7,27 @@ using System.Text;
 
 namespace AdriassengerApi.Utils
 {
-    public class Token
+    public class TokenManager : ITokenManager
     {
         private readonly IConfiguration _configuration;
-        public Token(IConfiguration configuration)
+
+        public TokenManager(IConfiguration configuration)
         {
             _configuration = configuration;
         }
-        public string GetToken(IEnumerable<Claim> authClaims)
+        public string GetAccessToken(User user)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:Issuer"],
-                audience: _configuration["JWT:Audience"],
-                expires: DateTime.Now.AddSeconds(20),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.UserName)
+            };
+
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], _configuration["Jwt:Audience"], claims, expires: DateTime.Now.AddSeconds(10), signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
@@ -41,7 +43,7 @@ namespace AdriassengerApi.Utils
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:key"]));
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateAudience = false, //you might want to validate the audience and issuer depending on your use case
@@ -61,7 +63,8 @@ namespace AdriassengerApi.Utils
                     throw new SecurityTokenException("Invalid token");
 
                 return principal;
-            } catch
+            }
+            catch
             {
                 return null;
             }

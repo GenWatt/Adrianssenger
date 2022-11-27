@@ -1,10 +1,6 @@
 import { Grid } from '@mui/material'
-import { useEffect } from 'react'
-import { Routes, useNavigate, Route, Outlet } from 'react-router-dom'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import LeftPanel from '../components/UserPanel/LeftPanel'
-import RightPanel from '../components/UserPanel/RightPanel'
-import useFetch from '../hooks/useFetch'
+import { Outlet } from 'react-router-dom'
+import LeftPanel from '../components/Panels/LeftPanel'
 
 export default function Home() {
   return (

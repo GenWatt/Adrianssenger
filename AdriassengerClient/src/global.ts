@@ -8,29 +8,41 @@ export enum ValidationRuleType {
   MAX = 'max',
   ISEMAIL = 'isEmail',
 }
+
+export enum ErrorTypes {
+  FORM,
+  INTERVAL,
+  USER,
+  AUTH,
+}
+
 export interface BasicResponse {
   success: boolean
   message: string
 }
 
-export interface ApiResponse<T> extends BasicResponse {
+export interface ApiErrors {
+  errors: ApiError[]
+}
+
+export interface ApiError {
+  errorMessage: string
+  type: ErrorTypes
+}
+
+export interface ApiResponse<T, R = ApiError> extends BasicResponse {
   data: T
+  errors: R[]
 }
 
 export interface UserHeaderData {
-  username: string
+  userName: string
   id: number
-  imgUrl: string
+  avatarUrl: string
 }
 
 export interface User extends UserHeaderData {
   email?: string
-  isVeryfied: boolean
-}
-
-export interface UserWithToken extends User {
-  token: string
-  refreshToken: string
 }
 
 export interface ErrorResponse<T> extends BasicResponse {
@@ -41,9 +53,49 @@ export interface Friend extends UserHeaderData {
   lastMessage: string
   friendId: number
   createAt: Date
+  requestAccepted: boolean
 }
 
 export interface SearchUser {
   id: number
-  username: string
+  userName: string
+}
+
+export interface Message {
+  id: number
+  message: string
+  senderId: number
+  receiverId: number
+  seen: boolean
+  createdAt: Date
+}
+
+export enum NotificationTypes {
+  SUCCESS,
+  ERROR,
+  WARNING,
+  INFO,
+}
+
+export enum NotificationActions {
+  READ,
+  ACCEPTORNOT,
+}
+
+export enum NotificationActionType {
+  FRIEND,
+}
+
+export interface NotificationState {
+  id: number
+  title: string
+  content: string
+  type: NotificationTypes
+  createdAt: Date
+  action: NotificationActions
+  actionType: NotificationActionType
+  userId: number
+  actionId: number
+  acceptUrl: string
+  rejectUrl: string
 }

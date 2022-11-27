@@ -1,4 +1,4 @@
-import RightPanel from '../components/UserPanel/RightPanel'
+import RightPanel from '../components/Panels/RightPanel'
 import Home from '../views/Home'
 import Login from '../views/Login'
 import Register from '../views/Register'

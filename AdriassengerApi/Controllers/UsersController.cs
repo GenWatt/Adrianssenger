@@ -2,11 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using AdriassengerApi.Data;
 using AdriassengerApi.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using AdriassengerApi.Utils;
-using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 public class FriendWithId
 {
@@ -20,119 +18,36 @@ namespace AdriassengerApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationContext _context;
-        private readonly IConfiguration _configuration;
 
-        public UsersController(IConfiguration config, ApplicationContext context)
+        public UsersController(ApplicationContext context)
         {
             _context = context;
-            _configuration = config;
         }
 
         // GET: api/Users
         [HttpGet("Search")]
-  
-        public async Task<ActionResult<IEnumerable<SearchUser>>> Getusers(string searchText)
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<SearchUser>>> GetSearchUsers(string searchText)
         {
-          if (_context.users == null)
-          {
-              return NotFound();
-          }
-          
-          var users = await _context.users.Where(s => s.Username!.Contains(searchText)).Select(u => new SearchUser() { Username = u.Username, Id = u.Id }).ToListAsync();
+            var currentUser = UserManager.GetCurrentUser(HttpContext);
+            if (currentUser == null) return Unauthorized("User not log in");
+            var users = await (from u in _context.Users
+                        where u.Id != currentUser.Id && u.UserName.Contains(searchText) &&
+                        !_context.friends.Any(f => (currentUser.Id == f.UserId && f.SecondUserId == u.Id) || (f.UserId == u.Id && currentUser.Id == f.SecondUserId))
+                        select new SearchUser { Id = u.Id, UserName = u.UserName }).ToArrayAsync();
 
-          return Ok(new Response<IEnumerable<SearchUser>>(true, "Users sended", users));
+            return Ok(new Response<IEnumerable<SearchUser>>(true, "Users sended", users));
         }
 
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> Getusers()
         {
-            if (_context.users == null)
+            if (_context.Users == null)
             {
                 return NotFound();
             }
-            return await _context.users.Include(u => u.Friends).ToListAsync();
-        }
-
-        // GET: api/Users/Login
-        [HttpPost("Login")]
-        [AllowAnonymous]
-        public async Task<ActionResult<UserWithToken>> GetUser([FromBody] UserData userData)
-        {
-          if (_context.users == null)
-          {
-              return NotFound(new ValidationErrorResponse("User not found."));
-          }
-            try
-            {
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == userData.Username);
-                if (user == null)
-                {
-                    return BadRequest(new ValidationErrorResponse("User or password is invalid."));
-                }
-
-                if (!BCrypt.Net.BCrypt.Verify(userData.Password, user.Password))
-                {
-                    return BadRequest(new ValidationErrorResponse("User or password is invalid."));
-                }
-
-                //create claims details based on the user information
-                var claims = new List<Claim> {
-                        new Claim("id", user.Id.ToString()),
-                        new Claim(ClaimTypes.Name, user.Username),
-                        new Claim(ClaimTypes.Email, user.Email)
-                    };
-                var tokenService = new Token(_configuration);
-                var token = tokenService.GetToken(claims);
-                var refreshToken = tokenService.GenerateRefreshToken();
-
-                user.RefreshToken = refreshToken;
-                user.RefreshExpiration = DateTime.Now.AddMinutes(5);
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new Response<UserWithToken>(true, "Succsess", new UserWithToken(user.Username, user.Id, token, refreshToken)));
-            } catch
-            {
-                return BadRequest();
-            }
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("refresh")]
-        public async Task<ActionResult<TokenApiModel>> Refresh(TokenApiModel tokenApiModel)
-        {
-            if (tokenApiModel is null) return BadRequest("Invalid client request");
-            string accessToken = tokenApiModel.AccessToken;
-            var tokenServices = new Token(_configuration);
-            var principal = tokenServices.GetPrincipalFromExpiredToken(accessToken);
-            if (principal == null) return BadRequest("Token is invalid");
-            var username = principal.Identity.Name; //this is mapped to the Name claim by default
-
-            try
-            {
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Username == username);
-                if (user is null || user.RefreshToken != tokenApiModel.RefreshToken || user.RefreshExpiration <= DateTime.Now)
-                    return BadRequest("Invalid client request");
-
-                var newAccessToken = tokenServices.GetToken(principal.Claims);
-                var newRefreshToken = tokenServices.GenerateRefreshToken();
-
-                user.RefreshToken = newRefreshToken;
-                user.RefreshExpiration = DateTime.Now.AddMinutes(5);
-
-                _context.SaveChanges();
-                return Ok(new Response<TokenApiModel>(true, "Tokens created", new TokenApiModel()
-                {
-                    AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken
-                }));
-            }
-            catch
-            {
-                return BadRequest("Server problem");
-            }
+            return await _context.Users.Include(u => u.Friends).ToListAsync();
         }
 
         // PUT: api/Users/5
@@ -172,13 +87,12 @@ namespace AdriassengerApi.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-          if (_context.users == null)
+          if (_context.Users == null)
           {
               return Problem("Entity set 'UserContext.users'  is null.");
           }
-            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
-            _context.users.Add(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
@@ -188,17 +102,17 @@ namespace AdriassengerApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            if (_context.users == null)
+            if (_context.Users == null)
             {
                 return NotFound();
             }
-            var user = await _context.users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            _context.users.Remove(user);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -206,7 +120,7 @@ namespace AdriassengerApi.Controllers
 
         private bool UserExists(int id)
         {
-            return (_context.users?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

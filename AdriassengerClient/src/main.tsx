@@ -6,13 +6,16 @@ import './index.css'
 import { RecoilRoot } from 'recoil'
 import { ThemeProvider } from '@mui/material'
 import { theme } from './theme'
+import { SnackbarProvider } from 'notistack'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <RecoilRoot>
         <ThemeProvider theme={theme}>
-          <App />
+          <SnackbarProvider>
+            <App />
+          </SnackbarProvider>
         </ThemeProvider>
       </RecoilRoot>
     </BrowserRouter>

@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useRecoilState, useRecoilValue } from 'recoil'
-import { UserWithToken } from '../global'
+import { UserHeaderData } from '../global'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { isAuthenticate, userState } from '../store/user'
 
@@ -10,9 +10,10 @@ export default function ProtectedRoute({ children }: any) {
   const { getObj } = useLocalStorage()
 
   if (!isAuth) {
-    const savedUser = getObj<UserWithToken>('user')
+    const savedUser = getObj<UserHeaderData>('user')
     savedUser && setUser(savedUser)
   }
+
   if (isAuth) return children
 
   return <Navigate to="/login" replace />
