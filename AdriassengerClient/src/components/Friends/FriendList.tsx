@@ -4,10 +4,10 @@ import useMesure from '../../hooks/useMesure'
 import { useNavigate, useParams } from 'react-router-dom'
 import FriendListItem from './FriendListItem'
 import useUser from '../../hooks/useUser'
-import useSignalR from '../../hooks/useSignalR'
-import useNotifications from '../../hooks/useNotifications'
+import useSignalR from '../../hooks/SignalR/useSignalR'
+import useNotifications from '../Notifications/useNotifications'
 import NotFound from '../UI/NotFound/NotFound'
-import useFriends from '../../hooks/useFriends'
+import useFriends from './useFriends'
 import Loader from '../UI/Loaders/Loader'
 
 interface FrindListProps {

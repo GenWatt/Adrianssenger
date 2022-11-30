@@ -10,6 +10,7 @@ const useStyles = makeStyles()((theme: Theme) => {
       border: 'none',
       backgroundColor: 'transparent',
       padding: 0,
+      cursor: 'pointer',
     },
   }
 })

@@ -5,9 +5,9 @@ import { useParams } from 'react-router-dom'
 import { useRecoilValue } from 'recoil'
 import { Friend } from '../../global'
 import useFetch from '../../hooks/useFetch'
-import useFriends from '../../hooks/useFriends'
+import useFriends from '../Friends/useFriends'
 import useFromTheme from '../../hooks/useFromTheme'
-import useMessage from '../../hooks/useMessage'
+import useMessage from '../Messages/useMessage'
 import useUser from '../../hooks/useUser'
 import { getFriendById } from '../../store/friends'
 import Messages from '../Messages/Messages'
@@ -30,7 +30,6 @@ export default function RightPanel() {
   const fetchMessages = async (id: number) => {
     try {
       const response = await loadMessages(id, user.id)
-      console.log(response)
       setMessages(response.data)
     } catch (err) {
       enqueueSnackbar(getErrorMessage(err), { variant: 'error' })

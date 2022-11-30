@@ -1,7 +1,7 @@
-import Form from '../components/Form'
+import Form from '../components/Forms/Form'
 import { FormSchema, UserHeaderData } from '../global'
 import useFetch from '../hooks/useFetch'
-import useForm from '../hooks/useFrom'
+import useForm from '../components/Forms/useFrom'
 import { userState } from '../store/user'
 import { useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
@@ -9,7 +9,7 @@ import { useState } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 
 const schema: FormSchema[] = [
-  { name: 'userName', id: 'userName', label: 'username', rules: { required: true } },
+  { name: 'userName', id: 'userName', label: 'Username', rules: { required: true } },
   { type: 'password', name: 'password', id: 'password', label: 'Password', rules: { required: true } },
   { type: 'link', label: "Don't have an account? Create one!", to: '/register', name: 'link' },
 ]
@@ -32,7 +32,6 @@ export default function Login() {
       setObj<UserHeaderData>('user', res.data)
       navigate('/')
     } catch (error) {
-      console.log(error)
       setErrorMessage(getErrorMessage(error))
     }
   }

@@ -3,11 +3,11 @@ import { makeStyles } from 'tss-react/mui'
 import MailIcon from '@mui/icons-material/Mail'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Friend } from '../../global'
-import useFetch from '../../hooks/useFetch'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import useFriends from './useFriends'
 
-interface Props {
+interface FriendListItemProps {
   isSelect?: boolean
   friend: Friend
 }
@@ -36,17 +36,11 @@ const useStyles = makeStyles<{ isSelect?: boolean }>()((theme: Theme, props) => 
   }
 })
 
-export default function FriendListItem({ isSelect, className, friend, ...props }: ListItemProps & Props) {
-  const { request } = useFetch()
+export default function FriendListItem({ isSelect, className, friend, ...props }: ListItemProps & FriendListItemProps) {
+  const { deleteFriend } = useFriends()
   const { classes } = useStyles({ isSelect })
   const theme = useTheme()
   const navigate = useNavigate()
-
-  const deleteFriend = async (id: number) => {
-    const response = await request('/Friends/' + id, 'DELETE')
-
-    console.log(response)
-  }
 
   const getClass = () => {
     let className = `${classes.roots} `
@@ -54,7 +48,7 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
     if (isSelect) className += classes.selected
     return className
   }
-  console.log(friend)
+
   return (
     <ListItem className={getClass() + ` ${className}`} {...props}>
       <Avatar src={friend.avatarUrl} />

@@ -4,7 +4,7 @@ import { routes } from './routes'
 import ProtectedRoute from './routes/ProtectedRoute'
 import React, { useEffect } from 'react'
 import AppBar from './components/UI/AppBar'
-import useSignalConnection from './hooks/useSignalConnection'
+import useSignalConnection from './hooks/SignalR/useSignalConnection'
 
 const hideAppBarPaths = ['/login', '/register']
 
