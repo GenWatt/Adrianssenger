@@ -1,24 +1,18 @@
-import { useSnackbar } from 'notistack'
-import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { useRecoilState } from 'recoil'
-import { initialUserValue, userState } from '../store/user'
-import useFetch from './useFetch'
+import { SERVER_ENDPOINT } from '../config'
+import { userState } from '../store/user'
 
 export default function useUser() {
   const [user, setUser] = useRecoilState(userState)
-  const { request } = useFetch()
-  const navigate = useNavigate()
-  const { enqueueSnackbar } = useSnackbar()
 
-  const logout = async () => {
-    try {
-      await request('/Account/Logout')
-      setUser(initialUserValue)
-      navigate('/login')
-    } catch (error) {
-      enqueueSnackbar('Something goes wrong with log out', { variant: 'error' })
-    }
+  const refresh = async () => {
+    return await axios({
+      url: SERVER_ENDPOINT + '/Account/Refresh',
+      withCredentials: true,
+      method: 'POST',
+    })
   }
 
-  return { user, logout }
+  return { user, refresh, setUser }
 }

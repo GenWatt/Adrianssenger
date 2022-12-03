@@ -1,32 +1,26 @@
 import { useEffect, useState } from 'react'
 import axios, { AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios'
-import { userState } from '../store/user'
-import { useRecoilState } from 'recoil'
 import { ApiErrors, ApiResponse, BasicResponse } from '../global'
-import { useNavigate } from 'react-router-dom'
-import { SERVER_URL } from '../config'
+import { SERVER_ENDPOINT } from '../config'
 import { axiosInstance } from '../utils/ApiServices'
 import useText from './useText'
 import { useSnackbar } from 'notistack'
-
-interface Tokens {
-  accessToken: string
-  refreshToken: string
-}
+import useUser from './useUser'
+import useReset from './useReset'
 
 let controller = new AbortController()
 
 const axiosConfig: AxiosRequestConfig = {
   withCredentials: true,
-  baseURL: SERVER_URL,
+  baseURL: SERVER_ENDPOINT,
 }
 
 export default function useFetch() {
   const [isLoading, setLoading] = useState(false)
-  const [user, setUser] = useRecoilState(userState)
-  const navigate = useNavigate()
+  const { refresh } = useUser()
   const { joinMessages } = useText()
   const { enqueueSnackbar } = useSnackbar()
+  const { resetAndNavigateToLoginPage } = useReset()
 
   const isError = <T = {}>(response: BasicResponse | ApiResponse<T>): response is ApiResponse<T> => {
     return 'data' in response
@@ -35,9 +29,7 @@ export default function useFetch() {
   useEffect(() => {
     //Response interceptor for API calls
     const responseInterseptor = axiosInstance.interceptors.response.use(
-      (response) => {
-        return response
-      },
+      (response) => response,
       async (error) => {
         const originalRequest = error.config
 
@@ -46,26 +38,25 @@ export default function useFetch() {
         }
 
         if (
+          error.response &&
           ((error.response.status && error.response.status === 401) || error.response.status === 403) &&
           !originalRequest._retry
         ) {
           originalRequest._retry = true
           try {
-            const tokens = await axios({ url: SERVER_URL + '/Account/Refresh', withCredentials: true, method: 'POST' })
+            const tokens = await refresh()
 
-            if (!tokens.data) return navigate('/login')
+            if (!tokens.data) return
 
             if (!axios.isAxiosError(tokens)) {
               return axios(originalRequest)
-            } else return navigate('/login')
+            } else return resetAndNavigateToLoginPage()
           } catch (error) {
-            navigate('/login')
+            resetAndNavigateToLoginPage()
             return enqueueSnackbar('Your authorization expired!', { variant: 'error' })
           }
         }
-        return Promise.reject((error: any) => {
-          console.log(error)
-        })
+        return error
       }
     )
 
@@ -74,7 +65,7 @@ export default function useFetch() {
       // console.log('boty')
       // controller.abort()
     }
-  }, [user])
+  }, [])
 
   async function request<T>(
     url: string,
@@ -84,8 +75,13 @@ export default function useFetch() {
   ) {
     setLoading(true)
     config = { ...axiosConfig, ...config, method, url, data }
-    const response: AxiosResponse<ApiResponse<T>> = await axiosInstance(config).finally(() => setLoading(false))
-    return response.data
+    const res: AxiosResponse<ApiResponse<T>> = await axiosInstance(config).finally(() => setLoading(false))
+
+    if (axios.isAxiosError(res)) {
+      throw res
+    }
+
+    return res.data
   }
 
   function getErrorMessage(error: unknown) {

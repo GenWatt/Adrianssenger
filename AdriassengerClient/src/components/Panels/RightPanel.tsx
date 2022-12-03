@@ -1,10 +1,8 @@
 import { Grid, useTheme } from '@mui/material'
-import { useSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useRecoilValue } from 'recoil'
 import { Friend } from '../../global'
-import useFetch from '../../hooks/useFetch'
 import useFriends from '../Friends/useFriends'
 import useFromTheme from '../../hooks/useFromTheme'
 import useMessage from '../Messages/useMessage'
@@ -13,6 +11,7 @@ import { getFriendById } from '../../store/friends'
 import Messages from '../Messages/Messages'
 import SendMessage from '../Messages/SendMessage'
 import UserInfo, { UserInfoTypes } from '../UserPanel/UserInfo'
+import NotFound from '../UI/NotFound/NotFound'
 
 export default function RightPanel() {
   const getFriend = useRecoilValue(getFriendById)
@@ -24,15 +23,14 @@ export default function RightPanel() {
   const container = useRef<any>(null)
   const { getNumberFromSpacing } = useFromTheme()
   const { setMessages, loadMessages, messagesStore } = useMessage()
-  const { enqueueSnackbar } = useSnackbar()
-  const { getErrorMessage } = useFetch()
+  const [errorMessage, setErrorMessage] = useState('')
 
   const fetchMessages = async (id: number) => {
     try {
       const response = await loadMessages(id, user.id)
       setMessages(response.data)
     } catch (err) {
-      enqueueSnackbar(getErrorMessage(err), { variant: 'error' })
+      setErrorMessage('Can not fetch messages')
     }
   }
 
@@ -48,6 +46,7 @@ export default function RightPanel() {
     if (id) {
       const idNum = +id
 
+      setErrorMessage('')
       setCurrentFriend(getFriend(idNum))
       fetchMessages(idNum)
     }
@@ -68,7 +67,7 @@ export default function RightPanel() {
       height={getMinHeight()}
     >
       {currentFriend && <UserInfo user={currentFriend} type={UserInfoTypes.FRIEND} />}
-      <Messages messages={messagesStore.messages} />
+      {errorMessage ? <NotFound>{errorMessage}</NotFound> : <Messages messages={messagesStore.messages} />}
       <SendMessage />
     </Grid>
   )

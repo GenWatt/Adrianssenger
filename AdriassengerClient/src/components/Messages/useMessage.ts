@@ -17,7 +17,7 @@ export default function useMessage() {
 
   const loadMessages = async (firstUserId: number, secondUserId: number) => {
     const response = await request<Message[]>('/Messages/' + firstUserId + '/' + secondUserId)
-
+    console.log(response)
     return response
   }
 

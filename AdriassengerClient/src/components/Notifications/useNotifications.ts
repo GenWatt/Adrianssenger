@@ -10,8 +10,9 @@ export default function useNotifications() {
   const loadNotifications = async () => {
     try {
       const response = await request<NotificationState[]>('/Notification')
-
-      setNotificationStore(() => ({ notifications: response.data }))
+      if (response) {
+        setNotificationStore(() => ({ notifications: response.data }))
+      }
     } catch (error) {
       console.log(error)
     }
@@ -40,5 +41,6 @@ export default function useNotifications() {
     notificationStore,
     loadNotifications,
     isLoading,
+    setNotificationStore,
   }
 }

@@ -1,10 +1,10 @@
 import { Dialog, MenuItem, MenuList, useTheme, DialogTitle, DialogContent } from '@mui/material'
-import useUser from '../../../hooks/useUser'
+import useUserAction from '../../../hooks/useUserAction'
 
 type UserMenuProps = { isShow: boolean; closeMenu: () => void }
 
 export default function UserMenu({ isShow, closeMenu }: UserMenuProps) {
-  const { logout } = useUser()
+  const { logout } = useUserAction()
   const theme = useTheme()
 
   return (

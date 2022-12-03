@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles'
 
 const primaryColor = '#2bc5c5'
-const primaryDark = 'rgb(30, 137, 137)'
+const primaryDark = 'rgb(30, 137, 137, 0.7)'
 const primaryLight = 'rgb(85, 208, 208)'
 const secondaryColor = '#e822d9'
 const secondaryLight = 'rgb(236, 78, 224)'

@@ -6,14 +6,14 @@ interface FriendState {
   currentTextingFriend: null | number
 }
 
-const initialFriendsValue: Friend[] = []
+export const initialFriendsValue: FriendState = {
+  friends: [],
+  currentTextingFriend: null,
+}
 
 export const friendsState = atom<FriendState>({
   key: 'friends',
-  default: {
-    friends: initialFriendsValue,
-    currentTextingFriend: null,
-  },
+  default: initialFriendsValue,
 })
 
 export const getFriendById = selector({

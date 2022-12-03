@@ -1,4 +1,14 @@
-import { ListItemProps, ListItem, Theme, Avatar, Grid, ListItemIcon, ListItemText, useTheme } from '@mui/material'
+import {
+  ListItemProps,
+  ListItem,
+  Theme,
+  Avatar,
+  Grid,
+  ListItemIcon,
+  ListItemText,
+  useTheme,
+  Tooltip,
+} from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import MailIcon from '@mui/icons-material/Mail'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -15,13 +25,19 @@ interface FriendListItemProps {
 const useStyles = makeStyles<{ isSelect?: boolean }>()((theme: Theme, props) => {
   return {
     roots: {
-      backgroundColor: theme.palette.primary.main,
       borderRadius: theme.spacing(0.5),
       marginTop: theme.spacing(0.5),
+      justifyContent: 'space-between',
       transition: 'background-color .3s ease',
       ['&:hover']: {
         backgroundColor: props.isSelect ? '' : theme.palette.primary.light,
       },
+    },
+    link: {
+      textDecoration: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
     },
     selected: {
       backgroundColor: theme.palette.primary.dark,
@@ -30,7 +46,7 @@ const useStyles = makeStyles<{ isSelect?: boolean }>()((theme: Theme, props) => 
       padding: theme.spacing(0.5),
       borderRadius: '50%',
       ['&:hover']: {
-        backgroundColor: theme.palette.secondary.light,
+        backgroundColor: theme.palette.primary.dark,
       },
     },
   }
@@ -40,7 +56,6 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
   const { deleteFriend } = useFriends()
   const { classes } = useStyles({ isSelect })
   const theme = useTheme()
-  const navigate = useNavigate()
 
   const getClass = () => {
     let className = `${classes.roots} `
@@ -51,9 +66,9 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
 
   return (
     <ListItem className={getClass() + ` ${className}`} {...props}>
-      <Avatar src={friend.avatarUrl} />
-      <Grid container p={1} direction="column" flexGrow={1}>
-        <Link to={`/messages/${friend.id}`}>
+      <Link className={classes.link} to={`/messages/${friend.id}`}>
+        <Avatar src={friend.avatarUrl} />
+        <Grid container p={1} direction="column" flexGrow={1}>
           <ListItemText
             className="width-inherit"
             primary={friend.userName}
@@ -64,14 +79,15 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
             primaryTypographyProps={{ className: 'ellipsis' }}
             primary={friend.lastMessage}
           />
-        </Link>
+        </Grid>
+      </Link>
+      <Grid>
+        <Tooltip title={`Delete ${friend.userName} from friends`}>
+          <ListItemIcon className={classes.buttons} onClick={() => deleteFriend(friend.friendId)}>
+            <DeleteIcon />
+          </ListItemIcon>
+        </Tooltip>
       </Grid>
-      <ListItemIcon className={classes.buttons} onClick={() => navigate('/messages/' + friend.id)}>
-        <MailIcon />
-      </ListItemIcon>
-      <ListItemIcon className={classes.buttons} onClick={() => deleteFriend(friend.friendId)}>
-        <DeleteIcon />
-      </ListItemIcon>
     </ListItem>
   )
 }

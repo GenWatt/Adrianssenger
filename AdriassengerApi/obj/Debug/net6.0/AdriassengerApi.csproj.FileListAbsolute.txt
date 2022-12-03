@@ -289,3 +289,4 @@ D:\Praca\Adriassenger\AdriassengerApi\bin\Debug\net6.0\Microsoft.AspNetCore.ApiA
 D:\Praca\Adriassenger\AdriassengerApi\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
 D:\Praca\Adriassenger\AdriassengerApi\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.UI.dll
 D:\Praca\Adriassenger\AdriassengerApi\bin\Debug\net6.0\Microsoft.Extensions.FileProviders.Embedded.dll
+D:\Praca\Adriassenger\AdriassengerApi\bin\Debug\net6.0\AdriassengerApi.staticwebassets.runtime.json

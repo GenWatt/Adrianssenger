@@ -13,6 +13,8 @@ namespace AdriassengerApi.ViewModels
         public string Email { get; set; }
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+
+        public IFormFile? ProfilePicture { get; set; }
     }
 
     public class UserViewWithId : UserView

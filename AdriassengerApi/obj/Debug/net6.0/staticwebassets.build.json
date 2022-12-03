@@ -1,11 +1,37 @@
 {
   "Version": 1,
-  "Hash": "5IHSl4IAdBZnZBdYY2EOjBK6Qp7Nv6JXj4pWFij804g=",
+  "Hash": "oRnyPbVmhmN6g1VYnDMxEfZOVVdz+Am0j0dPK36BjzA=",
   "Source": "AdriassengerApi",
   "BasePath": "_content/AdriassengerApi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "AdriassengerApi\\wwwroot",
+      "Source": "AdriassengerApi",
+      "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
+      "BasePath": "_content/AdriassengerApi",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\0029cefd-c30c-4383-b939-b2bc927245efd2c4e88a550f4e7cb06e1f4d876b63d6.png",
+      "SourceId": "AdriassengerApi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
+      "BasePath": "_content/AdriassengerApi",
+      "RelativePath": "Avatars/0029cefd-c30c-4383-b939-b2bc927245efd2c4e88a550f4e7cb06e1f4d876b63d6.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Avatars\\0029cefd-c30c-4383-b939-b2bc927245efd2c4e88a550f4e7cb06e1f4d876b63d6.png"
+    }
+  ]
 }

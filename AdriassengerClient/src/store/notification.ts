@@ -5,9 +5,11 @@ interface Notifications {
   notifications: NotificationState[]
 }
 
+export const initialNotificationState: Notifications = {
+  notifications: [],
+}
+
 export const notificationState = atom<Notifications>({
   key: 'notificationState',
-  default: {
-    notifications: [],
-  },
+  default: initialNotificationState,
 })

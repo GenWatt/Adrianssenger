@@ -1,9 +1,9 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { SERVER_URL } from '../config'
+import { SERVER_ENDPOINT } from '../config'
 import { ApiResponse } from '../global'
 
 const axiosConfig: AxiosRequestConfig = {
-  baseURL: SERVER_URL,
+  baseURL: SERVER_ENDPOINT,
   withCredentials: true,
 }
 

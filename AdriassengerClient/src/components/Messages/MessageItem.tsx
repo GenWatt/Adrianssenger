@@ -9,9 +9,8 @@ type MessageItemProps = { message: Message }
 const useStyles = makeStyles<{ senderId: number; userId: number }>()((theme: Theme, props) => {
   return {
     item: {
-      position: 'absolute',
       alignSelf: props.senderId === props.userId ? 'flex-start' : 'flex-end',
-      backgroundColor: theme.palette.primary.light,
+      backgroundColor: props.senderId === props.userId ? theme.palette.primary.light : theme.palette.grey[200],
       padding: theme.spacing(1),
       marginTop: theme.spacing(0.5),
       marginLeft: props.senderId !== props.userId ? theme.spacing(3) : 0,

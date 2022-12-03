@@ -58,5 +58,6 @@ export default function useFriends() {
     setCurrentTextingFriend,
     isLoading,
     deleteFriend,
+    setFriendStore,
   }
 }

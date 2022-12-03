@@ -3,6 +3,7 @@ import { CloseOutlined } from '@mui/icons-material'
 import { UserHeaderData } from '../../global'
 import { makeStyles } from 'tss-react/mui'
 import { useNavigate } from 'react-router-dom'
+import useFile from '../../hooks/useFile'
 
 interface UserInfoProps {
   user: UserHeaderData
@@ -29,12 +30,18 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
   const theme = useTheme()
   const { classes } = useStyles()
   const navigate = useNavigate()
+  const { getStaticFile } = useFile()
 
   return (
-    <Grid borderRadius={theme.spacing(0.5)} bgcolor={theme.palette.primary.main} container position="relative" p={1}>
+    <Grid
+      borderBottom={`${theme.spacing(0.1)} solid ${theme.palette.primary.main}`}
+      container
+      position="relative"
+      p={1}
+    >
       <Grid container>
         <Grid container>
-          <Avatar className="cursor-pointer"></Avatar>
+          <Avatar src={getStaticFile(user.avatarUrl)} className="cursor-pointer"></Avatar>
           <Typography ml={2} variant="body1">
             {user.userName}
           </Typography>

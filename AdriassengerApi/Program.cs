@@ -11,7 +11,8 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json.Serialization;
-using AdriassengerApi.Utils;
+using AdriassengerApi.Repository.UserRepo;
+using AdriassengerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,7 +62,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // add authorization
 builder.Services.AddAuthorization();
 builder.Services.AddRazorPages();
+
 builder.Services.AddSingleton<ITokenManager, TokenManager>();
+builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IStaticFiles, StaticFiles>();
+
 builder.Services.AddControllers().AddJsonOptions(o => {
     o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
@@ -91,7 +97,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseMiddleware<GlobalErrorHandler>();
+app.UseStaticFiles();
 app.UseCors();
 app.UseRouting();
 

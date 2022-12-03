@@ -18,14 +18,18 @@ export default function SendMessage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (!id) return
+
     const messageObj: Partial<Message> = { receiverId: +id, message }
+
     try {
       await request<Message>('/Messages', 'POST', messageObj)
+      setMessage('')
     } catch (error) {
       const errors = error as AxiosError<ApiErrors>
+
       if (axios.isAxiosError(error)) {
-        console.log(errors)
         errors.response &&
           errors.response.data &&
           enqueueSnackbar(joinMessages(errors.response.data.errors), { variant: 'error' })
