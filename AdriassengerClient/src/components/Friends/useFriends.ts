@@ -1,5 +1,5 @@
 import { friendsState } from '../../store/friends'
-import { Friend, NotificationState } from '../../global'
+import { Friend, Message, NotificationState } from '../../global'
 import { useRecoilState } from 'recoil'
 import useFetch from '../../hooks/useFetch'
 import { SearchUser } from '../../global'
@@ -48,6 +48,17 @@ export default function useFriends() {
     }
   }
 
+  const setLastMessage = (message: Message) => {
+    setFriendStore((prev) => ({
+      ...prev,
+      friends: prev.friends.map((friend) =>
+        friend.id === message.receiverId || friend.id === message.senderId
+          ? { ...friend, lastMessage: message.message }
+          : friend
+      ),
+    }))
+  }
+
   return {
     removeFriend,
     rejectFriendRequest,
@@ -59,5 +70,6 @@ export default function useFriends() {
     isLoading,
     deleteFriend,
     setFriendStore,
+    setLastMessage,
   }
 }

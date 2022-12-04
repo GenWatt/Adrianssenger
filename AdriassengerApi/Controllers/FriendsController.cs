@@ -6,7 +6,6 @@ using AdriassengerApi.Utils;
 using AdriassengerApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
-using AdriassengerApi.Utils.Response;
 using AdriassengerApi.Exceptions.ErrorService;
 using AdriassengerApi.Exceptions;
 
@@ -28,6 +27,7 @@ namespace AdriassengerApi.Controllers
 
         // GET: api/Friends
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Friend>>> Getfriends()
         {
             return await _context.friends.Include(u => u.User).ToListAsync();
@@ -204,6 +204,7 @@ namespace AdriassengerApi.Controllers
 
         // DELETE: api/Friends/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteFriend(int id)
         {
             var friend = await _context.friends.FirstOrDefaultAsync(f => f.FriendId == id);

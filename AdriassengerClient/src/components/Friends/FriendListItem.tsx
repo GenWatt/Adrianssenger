@@ -10,12 +10,12 @@ import {
   Tooltip,
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
-import MailIcon from '@mui/icons-material/Mail'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Friend } from '../../global'
-import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import useFriends from './useFriends'
+import { useState } from 'react'
+import RemoveFriend from '../UI/Dialogs/RemoveFriend'
 
 interface FriendListItemProps {
   isSelect?: boolean
@@ -53,9 +53,20 @@ const useStyles = makeStyles<{ isSelect?: boolean }>()((theme: Theme, props) => 
 })
 
 export default function FriendListItem({ isSelect, className, friend, ...props }: ListItemProps & FriendListItemProps) {
-  const { deleteFriend } = useFriends()
   const { classes } = useStyles({ isSelect })
   const theme = useTheme()
+  const [isOpen, setIsOpen] = useState(false)
+  const [friendToDelete, setFriendToDelete] = useState<Friend | null>(null)
+
+  const handleClose = () => {
+    setFriendToDelete(null)
+    setIsOpen(false)
+  }
+
+  const handleOpen = (friend: Friend) => {
+    setFriendToDelete(friend)
+    setIsOpen(true)
+  }
 
   const getClass = () => {
     let className = `${classes.roots} `
@@ -66,6 +77,7 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
 
   return (
     <ListItem className={getClass() + ` ${className}`} {...props}>
+      {friendToDelete && <RemoveFriend isOpen={isOpen} onClose={handleClose} friend={friendToDelete} />}
       <Link className={classes.link} to={`/messages/${friend.id}`}>
         <Avatar src={friend.avatarUrl} />
         <Grid container p={1} direction="column" flexGrow={1}>
@@ -83,7 +95,7 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
       </Link>
       <Grid>
         <Tooltip title={`Delete ${friend.userName} from friends`}>
-          <ListItemIcon className={classes.buttons} onClick={() => deleteFriend(friend.friendId)}>
+          <ListItemIcon className={classes.buttons} onClick={() => handleOpen(friend)}>
             <DeleteIcon />
           </ListItemIcon>
         </Tooltip>

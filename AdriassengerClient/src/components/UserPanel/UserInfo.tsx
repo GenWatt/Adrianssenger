@@ -4,6 +4,8 @@ import { UserHeaderData } from '../../global'
 import { makeStyles } from 'tss-react/mui'
 import { useNavigate } from 'react-router-dom'
 import useFile from '../../hooks/useFile'
+import { useState } from 'react'
+import EditPhoto from '../UI/Dialogs/EditPhoto'
 
 interface UserInfoProps {
   user: UserHeaderData
@@ -31,6 +33,11 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
   const { classes } = useStyles()
   const navigate = useNavigate()
   const { getStaticFile } = useFile()
+  const [isEdit, setIsEdit] = useState(false)
+
+  const editPhoto = () => setIsEdit(true)
+
+  const onClose = () => setIsEdit(false)
 
   return (
     <Grid
@@ -39,9 +46,10 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
       position="relative"
       p={1}
     >
+      <EditPhoto isOpen={isEdit} handleClose={onClose} />
       <Grid container>
         <Grid container>
-          <Avatar src={getStaticFile(user.avatarUrl)} className="cursor-pointer"></Avatar>
+          <Avatar onClick={editPhoto} src={getStaticFile(user.avatarUrl)} className="cursor-pointer" />
           <Typography ml={2} variant="body1">
             {user.userName}
           </Typography>

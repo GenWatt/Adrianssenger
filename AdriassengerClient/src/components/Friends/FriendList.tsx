@@ -55,11 +55,11 @@ export default function FrindList({ searchText }: FrindListProps) {
 
   useEffect(() => {
     id && messageFriend(+id)
-    getFriends()
-  }, [id])
+  }, [])
 
   useEffect(() => {
     signalR.connection?.on('SendFriendRequest', addNotification)
+    getFriends()
 
     return () => {
       signalR.connection?.off('SendFriendRequest', addNotification)

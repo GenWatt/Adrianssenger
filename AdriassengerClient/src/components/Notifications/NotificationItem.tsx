@@ -1,8 +1,10 @@
-import { Button, Grid, ListItem, Theme, Typography } from '@mui/material'
+import { Button, Grid, ListItem, Theme, Typography, useTheme } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { NotificationState } from '../../global'
 import useFetch from '../../hooks/useFetch'
 import useText from '../../hooks/useText'
+import IconButton from '../UI/Buttons/IconButton'
+import useNotifications from './useNotifications'
 
 type NotificationItemProps = {
   notification: NotificationState
@@ -28,8 +30,10 @@ const useStyles = makeStyles()((theme: Theme) => {
 
 export default function NotificationItem({ notification }: NotificationItemProps) {
   const { classes } = useStyles()
+  const theme = useTheme()
   const { request, isLoading } = useFetch()
   const { getDateString } = useText()
+  const { deleteNotificationApi, removeNotification } = useNotifications()
 
   const acceptRequest = async (notification: NotificationState) => {
     try {
@@ -43,8 +47,19 @@ export default function NotificationItem({ notification }: NotificationItemProps
     } catch (error) {}
   }
 
+  const deleteNotification = (id: number) => {
+    deleteNotificationApi(id)
+    removeNotification(id)
+  }
+
   return (
     <ListItem className={classes.roots}>
+      <IconButton
+        onClick={() => deleteNotification(notification.id)}
+        style={{ position: 'absolute', right: theme.spacing(0.5), top: theme.spacing(0.5) }}
+      >
+        Close
+      </IconButton>
       <Grid container direction="column">
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="body1">{notification.title}</Typography>

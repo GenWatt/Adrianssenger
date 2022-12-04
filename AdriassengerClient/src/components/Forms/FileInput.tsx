@@ -1,4 +1,4 @@
-import { Button, FormControl, Grid, Input, InputProps } from '@mui/material'
+import { Button, FormControl, Grid, Input, InputProps, useTheme } from '@mui/material'
 import React, { CSSProperties, useRef } from 'react'
 import FormErrors from './FormErrors'
 
@@ -22,6 +22,7 @@ export default function FileInput({
   ...input
 }: FileInputProps) {
   const inputRef = useRef<any | null>()
+  const theme = useTheme()
 
   const focusOnInput = () => {
     if (inputRef.current) {
@@ -32,7 +33,14 @@ export default function FileInput({
   return (
     <FormControl style={controllStyles}>
       <label htmlFor={id} onClick={focusOnInput}>
-        <Button variant="contained">{label}</Button>
+        {preview && (
+          <Grid my={1} container justifyContent="center">
+            <img style={{ width: '15vw' }} src={preview} alt="preview" />
+          </Grid>
+        )}
+        <Button style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }} variant="contained">
+          {label}
+        </Button>
         <Input
           ref={inputRef}
           style={{ display: 'none' }}
@@ -43,11 +51,6 @@ export default function FileInput({
           {...input}
         />
       </label>
-      {preview && (
-        <Grid mt={1} container justifyContent="center">
-          <img style={{ width: '15vw' }} src={preview} alt="preview" />
-        </Grid>
-      )}
       <FormErrors errors={errors} name={name} />
     </FormControl>
   )

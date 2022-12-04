@@ -28,7 +28,6 @@ export default function AddFriendDialog({ handleClose, ...props }: DialogProps &
 
     try {
       const friendsResponse = await searchForFriends(newValue)
-
       setUsers(friendsResponse)
     } catch (error) {
       enqueueSnackbar(searchUserApi.getErrorMessage(error), { variant: 'error' })

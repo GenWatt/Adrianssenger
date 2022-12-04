@@ -2,11 +2,9 @@ import Form from '../components/Forms/Form'
 import { FormSchema, UserHeaderData } from '../global'
 import useFetch from '../hooks/useFetch'
 import useForm from '../components/Forms/useFrom'
-import { userState } from '../store/user'
-import { useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import useLocalStorage from '../hooks/useLocalStorage'
+import useUser from '../hooks/useUser'
 
 const schema: FormSchema[] = [
   { name: 'userName', id: 'userName', label: 'Username', rules: { required: true } },
@@ -17,10 +15,9 @@ const schema: FormSchema[] = [
 export default function Login() {
   const { request, isLoading, getErrorMessage } = useFetch()
   const { convertFormDataToObject } = useForm()
-  const [user, setUser] = useRecoilState(userState)
+  const { updateUser } = useUser()
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState('')
-  const { setObj } = useLocalStorage()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -28,8 +25,7 @@ export default function Login() {
       const loginData = convertFormDataToObject<{ userName: string; password: string }>(e.target as HTMLFormElement)
       const res = await request<UserHeaderData>('/Account/Login', 'POST', loginData)
 
-      setUser(res.data)
-      setObj<UserHeaderData>('user', res.data)
+      updateUser(res.data)
       navigate('/')
     } catch (error) {
       setErrorMessage(getErrorMessage(error))

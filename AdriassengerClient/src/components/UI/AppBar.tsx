@@ -1,10 +1,9 @@
-import { Badge, Grid, Popover, useTheme } from '@mui/material'
+import { Badge, Grid, Popover, Tooltip, Typography, useTheme } from '@mui/material'
 import NotificationIcon from '@mui/icons-material/Notifications'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useEffect, useState } from 'react'
 import NotificationList from '../Notifications/NotificationList'
 import IconButton from './Buttons/IconButton'
-import Logo from '../../assets/adrianssenger.png'
 import useNotifications from '../Notifications/useNotifications'
 import Loader from './Loaders/Loader'
 import UserMenu from './Dialogs/UserMenu'
@@ -12,7 +11,7 @@ import UserMenu from './Dialogs/UserMenu'
 export default function AppBar() {
   const [isOpen, setOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const { loadNotifications, notificationStore, isLoading } = useNotifications()
+  const { loadNotifications, notificationStore, isLoading, notificationLength } = useNotifications()
   const theme = useTheme()
 
   const openNotificationList = (e: any) => {
@@ -26,36 +25,42 @@ export default function AppBar() {
 
   const id = anchorEl ? 'Notifications popover' : undefined
 
+  const getNotificationsTooltipTitle = () =>
+    notificationLength() ? `You have ${notificationLength()} notifications` : "You don't have notifications"
+
   useEffect(() => {
     loadNotifications()
   }, [])
 
   return (
-    <Grid
-      mb={1}
-      borderRadius={theme.spacing(0.4)}
-      bgcolor={theme.palette.primary.main}
-      container
-      justifyContent="space-between"
-      alignItems="center"
-    >
+    <Grid mb={1} borderRadius={theme.spacing(0.4)} container justifyContent="space-between" alignItems="center">
       <UserMenu isShow={isOpen} closeMenu={closeUserMenu} />
       <Grid item>
-        <img
-          style={{ width: theme.spacing(8), height: theme.spacing(8), borderRadius: theme.spacing(0.4) }}
-          src={Logo}
-          alt="logo"
-        />
+        <Typography variant="h5" textTransform="uppercase" fontWeight="bold">
+          Chat App
+        </Typography>
       </Grid>
       <Grid item display="flex" style={{ paddingRight: theme.spacing(1), gap: theme.spacing(0.5) }}>
-        <IconButton>
-          <Badge onClick={openNotificationList} badgeContent={notificationStore.notifications.length} color="secondary">
-            <NotificationIcon aria-describedby={id} />
-          </Badge>
-        </IconButton>
-        <IconButton onClick={openUserMenu} style={{ height: 24 }}>
-          <SettingsIcon />
-        </IconButton>
+        <Tooltip title={getNotificationsTooltipTitle()}>
+          <div>
+            <IconButton>
+              <Badge
+                onClick={openNotificationList}
+                badgeContent={notificationStore.notifications.length}
+                color="secondary"
+              >
+                <NotificationIcon aria-describedby={id} />
+              </Badge>
+            </IconButton>
+          </div>
+        </Tooltip>
+        <Tooltip title="Options">
+          <div>
+            <IconButton onClick={openUserMenu} style={{ height: 24 }}>
+              <SettingsIcon />
+            </IconButton>
+          </div>
+        </Tooltip>
       </Grid>
       <Popover
         id={id}

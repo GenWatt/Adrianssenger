@@ -15,9 +15,8 @@ export default function useMessage() {
     setMessagesStore({ messages })
   }
 
-  const loadMessages = async (firstUserId: number, secondUserId: number) => {
-    const response = await request<Message[]>('/Messages/' + firstUserId + '/' + secondUserId)
-    console.log(response)
+  const loadMessages = async (userId: number, receiverId: number) => {
+    const response = await request<Message[]>('/Messages?userId=' + userId + '&receiverId=' + receiverId)
     return response
   }
 

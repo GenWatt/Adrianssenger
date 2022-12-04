@@ -8,8 +8,7 @@ export default function useRegister() {
 
   const register = async (form: HTMLFormElement) => {
     try {
-      const res = await request<User>('/Account/Register', 'POST', new FormData(form))
-      console.log(res)
+      await request<User>('/Account/Register', 'POST', new FormData(form))
       return { success: true }
     } catch (error) {
       setErrorMessage(getErrorMessage(error))

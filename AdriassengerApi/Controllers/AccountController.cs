@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace AdriassengerApi.Controllers
 {
@@ -108,6 +107,7 @@ namespace AdriassengerApi.Controllers
 
             return currentUser;
         }
+
         [HttpPost("Refresh")]
         [AllowAnonymous]
         public async Task<ActionResult<SuccessResponse<string>>> RefreshToken()
@@ -115,7 +115,7 @@ namespace AdriassengerApi.Controllers
             var refreshToken = Request.Cookies["RefreshToken"];
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
 
-            if (refreshToken is not null && currentUser is not null && currentUser.RefreshTokenExpirationDate > DateTime.Now)
+            if (refreshToken is not null && currentUser is not null && currentUser.RefreshTokenExpirationDate > DateTime.Now && currentUser.IsAccessTokenValid)
             {
                 var newAccessToken = _tokenManager.GetAccessToken(currentUser);
                 var newRefreshToken = _tokenManager.GenerateRefreshToken();
@@ -133,7 +133,7 @@ namespace AdriassengerApi.Controllers
                 return Ok(new SuccessResponse<string> { Data = "Refresh Token", Message = "Success" });
             }
 
-            return Unauthorized();
+            return BadRequest();
         }
  
         [HttpGet("Logout")]

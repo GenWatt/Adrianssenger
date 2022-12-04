@@ -1,12 +1,12 @@
-﻿using AdriassengerApi.Data;
-using AdriassengerApi.Models;
-using AdriassengerApi.Utils;
+﻿using AdriassengerApi.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AdriassengerApi.Hubs
 {
     public class FriendHub : Hub<IFriendHub>
     {
+        [AllowAnonymous]
         public override async Task OnConnectedAsync()
         {
             var user = UserManager.GetCurrentUser(Context.GetHttpContext());

@@ -4,11 +4,10 @@ using AdriassengerApi.Models;
 using AdriassengerApi.Utils;
 using AdriassengerApi.Utils.Response;
 using AdriassengerApi.ViewModels;
-using Microsoft.AspNet.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace AdriassengerApi.Controllers
 {
@@ -25,7 +24,7 @@ namespace AdriassengerApi.Controllers
             _chatHub = chatHub;
         }
 
-        // GET api/<Messages>/5/4
+        // GET api/<Messages>?userId=5&receiverId=4
         [HttpGet()]
         [Authorize]
         public async Task<ActionResult<Response<List<Messages>>>> Get(int userId, int receiverId)
@@ -34,7 +33,7 @@ namespace AdriassengerApi.Controllers
             return new Response<List<Messages>>(true, "Successfully recvied massages", messages);
         }
 
-        // POST api/<MessagesController>s
+        // POST api/<MessagesController>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> Post([FromBody] MessageView message)

@@ -67,8 +67,19 @@ namespace AdriassengerApi.Controllers
 
         // DELETE api/<NotificationController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
         {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
+
+            if (notification is null)
+            {
+                return NotFound();
+            }
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

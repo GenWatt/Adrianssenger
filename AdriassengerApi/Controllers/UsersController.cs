@@ -4,7 +4,11 @@ using AdriassengerApi.Data;
 using AdriassengerApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using AdriassengerApi.Utils;
-using System.Security.Claims;
+using AdriassengerApi.ViewModels;
+using AdriassengerApi.Services;
+using AdriassengerApi.Models.UserModels;
+using AdriassengerApi.Repository.UserRepo;
+using AdriassengerApi.Utils.Response;
 
 public class FriendWithId
 {
@@ -18,10 +22,14 @@ namespace AdriassengerApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationContext _context;
+        private readonly IStaticFiles _staticFiles;
+        private readonly IUserRepository _userRepository;
 
-        public UsersController(ApplicationContext context)
+        public UsersController(ApplicationContext context, IStaticFiles staticFiles, IUserRepository userRepository)
         {
             _context = context;
+            _staticFiles = staticFiles;
+            _userRepository = userRepository;
         }
 
         // GET: api/Users
@@ -39,63 +47,31 @@ namespace AdriassengerApi.Controllers
             return Ok(new Response<IEnumerable<SearchUser>>(true, "Users sended", users));
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> Getusers()
-        {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            return await _context.Users.Include(u => u.Friends).ToListAsync();
-        }
-
         // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        [Authorize]
+        public async Task<IActionResult> PutUser(int id, [FromForm] EditUserView user)
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
-            _context.Entry(user).State = EntityState.Modified;
+            if (currentUser == null) return NotFound();
 
-            try
+            if (user.ProfilePicture is not null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
+                if (currentUser.AvatarUrl != "")
                 {
-                    return NotFound();
+                    await _staticFiles.DeleteAvatar(currentUser.AvatarUrl);
                 }
-                else
-                {
-                    throw;
-                }
+
+                var response = await _staticFiles.SaveAvatar(user.ProfilePicture);
+ 
+                if (response.Success) currentUser.AvatarUrl = response.Path;
             }
 
-            return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-          if (_context.Users == null)
-          {
-              return Problem("Entity set 'UserContext.users'  is null.");
-          }
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            _userRepository.Update(currentUser);
+            await _userRepository.SaveAsync();
+            
+            return Ok(new SuccessResponse<UserWithoutCredentials> { Message = "Successfully edited user", Data = new UserWithoutCredentials(currentUser) });
         }
 
         // DELETE: api/Users/5

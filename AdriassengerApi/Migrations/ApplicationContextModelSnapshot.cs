@@ -48,6 +48,9 @@ namespace AdriassengerApi.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("LastMessage")
                         .IsRequired()
                         .HasColumnType("longtext");

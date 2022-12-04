@@ -9,6 +9,8 @@ import useUser from './useUser'
 import useReset from './useReset'
 
 let controller = new AbortController()
+let isRefreshing = false
+let requestsToRefresh: any = []
 
 const axiosConfig: AxiosRequestConfig = {
   withCredentials: true,
@@ -37,24 +39,32 @@ export default function useFetch() {
           return enqueueSnackbar('Can not connect to server', { variant: 'error' })
         }
 
-        if (
-          error.response &&
-          ((error.response.status && error.response.status === 401) || error.response.status === 403) &&
-          !originalRequest._retry
-        ) {
+        if (error.response && error.response.status && error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true
-          try {
-            const tokens = await refresh()
-
-            if (!tokens.data) return
-
-            if (!axios.isAxiosError(tokens)) {
-              return axios(originalRequest)
-            } else return resetAndNavigateToLoginPage()
-          } catch (error) {
-            resetAndNavigateToLoginPage()
-            return enqueueSnackbar('Your authorization expired!', { variant: 'error' })
+          if (!isRefreshing) {
+            isRefreshing = true
+            refresh()
+              .then((data: any) => {
+                if (axios.isAxiosError(data)) {
+                  resetAndNavigateToLoginPage()
+                } else requestsToRefresh.forEach((cb: any) => cb())
+              })
+              .catch(() => {
+                requestsToRefresh = []
+                resetAndNavigateToLoginPage()
+              })
+              .finally(() => {
+                requestsToRefresh = []
+                isRefreshing = false
+              })
           }
+
+          return new Promise((resolve, reject) => {
+            requestsToRefresh.push(() => {
+              resolve(axios(originalRequest))
+              reject(error)
+            })
+          })
         }
         return error
       }

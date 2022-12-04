@@ -61,25 +61,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 // add authorization
 builder.Services.AddAuthorization();
-builder.Services.AddRazorPages();
 
 builder.Services.AddSingleton<ITokenManager, TokenManager>();
 builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IStaticFiles, StaticFiles>();
 
-builder.Services.AddControllers().AddJsonOptions(o => {
+builder.Services.AddControllers().AddNewtonsoftJson(o => {
+    o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+}).AddJsonOptions(o => {
     o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 builder.Services.AddTransient<IErrorService, ErrorService>();
-
-// Add services to the container.
-builder.Services.AddControllers().AddNewtonsoftJson(options => {
-
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-}
-);
 
 /* Authentication / users / roles */
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -98,7 +92,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<GlobalErrorHandler>();
+
 app.UseStaticFiles();
 app.UseCors();
 app.UseRouting();
@@ -107,7 +101,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapRazorPages();
 app.MapHub<FriendHub>("/api/Chat");
+app.UseMiddleware<GlobalErrorHandler>();
 
 app.Run();

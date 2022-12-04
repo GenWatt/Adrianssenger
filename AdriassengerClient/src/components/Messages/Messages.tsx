@@ -27,7 +27,7 @@ export default function Messages({ messages }: MessagesProps) {
 
   const setScroll = () => {
     if (listRef.current) {
-      ref.current.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
+      ref.current.scrollTo({ top: listRef.current.scrollHeight })
     }
   }
 

@@ -15,10 +15,4 @@ async function getRequest<T>(url: string) {
   return response.data
 }
 
-const postRequest = (url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET') => {}
-
-const putRequest = (url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET') => {}
-
-const deleteRequest = (url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET') => {}
-
 export { axiosInstance, getRequest }

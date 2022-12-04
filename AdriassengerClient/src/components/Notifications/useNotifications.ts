@@ -18,6 +18,10 @@ export default function useNotifications() {
     }
   }
 
+  const deleteNotificationApi = async (id: number) => {
+    await request('/Notification/' + id, 'DELETE')
+  }
+
   const removeNotification = (id: number) => {
     setNotificationStore((prev) => ({
       notifications: prev.notifications.filter((notification) => notification.id !== id),
@@ -34,6 +38,8 @@ export default function useNotifications() {
     setNotificationStore((prev) => ({ notifications: [...prev.notifications, data] }))
   }
 
+  const notificationLength = () => notificationStore.notifications.length
+
   return {
     removeNotification,
     addNotification,
@@ -42,5 +48,7 @@ export default function useNotifications() {
     loadNotifications,
     isLoading,
     setNotificationStore,
+    notificationLength,
+    deleteNotificationApi,
   }
 }

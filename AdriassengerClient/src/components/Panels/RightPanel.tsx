@@ -27,7 +27,7 @@ export default function RightPanel() {
 
   const fetchMessages = async (id: number) => {
     try {
-      const response = await loadMessages(id, user.id)
+      const response = await loadMessages(user.id, id)
       setMessages(response.data)
     } catch (err) {
       setErrorMessage('Can not fetch messages')

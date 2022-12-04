@@ -10,10 +10,11 @@ export default function useUserAction() {
   const logout = async () => {
     try {
       await request('/Account/Logout')
-      resetAndNavigateToLoginPage()
     } catch (error) {
       enqueueSnackbar('Something goes wrong with log out', { variant: 'error' })
     }
+
+    resetAndNavigateToLoginPage()
   }
 
   return { logout }
