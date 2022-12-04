@@ -45,7 +45,7 @@ export default function Form({ schema, header, buttonText, onSubmit, isLoading, 
     if (type === 'file')
       return (
         <FileInput
-          controllStyles={{ alignSelf: 'flex-start', width: '100%' }}
+          controllStyles={{ alignItems: 'center', width: '100%' }}
           label={label}
           handleChange={fileInputChange}
           name={name}

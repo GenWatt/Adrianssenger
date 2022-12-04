@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material'
+import { Button, Dialog, DialogContent, DialogTitle, Grid } from '@mui/material'
 import { Friend } from '../../../global'
 import useFriends from '../../Friends/useFriends'
 
@@ -8,14 +8,16 @@ export default function RemoveFriend({ friend, isOpen, onClose }: RemoveFriendPr
   const { deleteFriend } = useFriends()
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>Are you sure to remove {friend.userName}</DialogTitle>
+      <DialogTitle>Are you sure to remove {friend.userName}?</DialogTitle>
       <DialogContent>
-        <Button onClick={() => deleteFriend(friend.friendId)} variant="contained" color="success">
-          Yes
-        </Button>
-        <Button onClick={onClose} variant="contained" color="error">
-          No
-        </Button>
+        <Grid container justifyContent="space-between">
+          <Button onClick={() => deleteFriend(friend.friendId)} variant="contained" color="success">
+            Yes
+          </Button>
+          <Button onClick={onClose} variant="contained" color="error">
+            No
+          </Button>
+        </Grid>
       </DialogContent>
     </Dialog>
   )

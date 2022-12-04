@@ -4,6 +4,7 @@ import { NotificationState } from '../../global'
 import useFetch from '../../hooks/useFetch'
 import useText from '../../hooks/useText'
 import IconButton from '../UI/Buttons/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 import useNotifications from './useNotifications'
 
 type NotificationItemProps = {
@@ -22,8 +23,9 @@ const useStyles = makeStyles()((theme: Theme) => {
       },
     },
     closeIcon: {
-      alignSelf: 'flex-end',
-      cursor: 'pointer',
+      position: 'absolute',
+      right: theme.spacing(0.5),
+      top: theme.spacing(0.5),
     },
   }
 })
@@ -54,11 +56,8 @@ export default function NotificationItem({ notification }: NotificationItemProps
 
   return (
     <ListItem className={classes.roots}>
-      <IconButton
-        onClick={() => deleteNotification(notification.id)}
-        style={{ position: 'absolute', right: theme.spacing(0.5), top: theme.spacing(0.5) }}
-      >
-        Close
+      <IconButton onClick={() => deleteNotification(notification.id)} className={classes.closeIcon}>
+        <CloseIcon />
       </IconButton>
       <Grid container direction="column">
         <Grid container justifyContent="space-between" alignItems="center">

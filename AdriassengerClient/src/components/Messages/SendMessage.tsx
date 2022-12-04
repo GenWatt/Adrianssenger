@@ -21,11 +21,9 @@ export default function SendMessage() {
     const messageObj: Partial<Message> = { receiverId: +id, message }
 
     try {
-      const res = await request<Message>('/Messages', 'POST', messageObj)
-      console.log(res)
+      await request<Message>('/Messages', 'POST', messageObj)
       setMessage('')
     } catch (error) {
-      console.log(error)
       enqueueSnackbar('Problem with sending message', { variant: 'error' })
     }
   }

@@ -7,6 +7,7 @@ import useFile from '../../../hooks/useFile'
 import useUser from '../../../hooks/useUser'
 import Form from '../../Forms/Form'
 import IconButton from '../Buttons/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 
 type EditPhotoProps = { isOpen: boolean; handleClose: () => void }
 
@@ -35,7 +36,7 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
         style={{ position: 'absolute', right: theme.spacing(1), top: theme.spacing(1) }}
         onClick={handleClose}
       >
-        Close
+        <CloseIcon />
       </IconButton>
       <DialogTitle>Edit Photo</DialogTitle>
       <DialogContent>

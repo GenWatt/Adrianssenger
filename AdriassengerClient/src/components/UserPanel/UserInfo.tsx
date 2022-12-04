@@ -35,7 +35,7 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
   const { getStaticFile } = useFile()
   const [isEdit, setIsEdit] = useState(false)
 
-  const editPhoto = () => setIsEdit(true)
+  const editPhoto = () => type === UserInfoTypes.CURRENT_USER && setIsEdit(true)
 
   const onClose = () => setIsEdit(false)
 
