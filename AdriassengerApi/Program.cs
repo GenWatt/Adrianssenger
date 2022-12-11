@@ -1,7 +1,5 @@
 using AdriassengerApi;
 using AdriassengerApi.Data;
-using AdriassengerApi.Exceptions;
-using AdriassengerApi.Exceptions.ErrorService;
 using AdriassengerApi.Hubs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +11,9 @@ using System.Text.Json.Serialization;
 using Newtonsoft.Json.Serialization;
 using AdriassengerApi.Repository.UserRepo;
 using AdriassengerApi.Services;
+using AdriassengerApi.Repository.FriendRepo;
+using AdriassengerApi.Repository.NotificationsRepo;
+using AdriassengerApi.Repository.MessagesRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.Al
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First()));
-//
+
 builder.Services.AddSignalR();
 // configure jwt authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
@@ -42,7 +43,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         context.Response.StatusCode = 401;
         await context.Response.WriteAsync(
             JsonConvert.SerializeObject(
-                new ErrorService().AddError(new UnauthorizedError()).GetErrorResponse(), 
+                "Unauthorized",
                 new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
     };
 
@@ -63,8 +64,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<ITokenManager, TokenManager>();
+// repos
 builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IFriendRepository, FriendRepository>();
+builder.Services.AddTransient<INotificationsRepository, NotificationsRepository>();
+builder.Services.AddTransient<IMessagesRepository, MessagesRepository>();
+
 builder.Services.AddSingleton<IStaticFiles, StaticFiles>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(o => {
@@ -73,15 +79,13 @@ builder.Services.AddControllers().AddNewtonsoftJson(o => {
 }).AddJsonOptions(o => {
     o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddTransient<IErrorService, ErrorService>();
 
-/* Authentication / users / roles */
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // mysql service
 var connectionString = builder.Configuration.GetConnectionString("mysql");
 builder.Services.AddDbContext<ApplicationContext>(options => 
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-// Authentication service
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 var app = builder.Build();
 
@@ -92,7 +96,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseMiddleware<GlobalErrorHandler>();
 app.UseStaticFiles();
 app.UseCors();
 app.UseRouting();
@@ -102,6 +106,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<FriendHub>("/api/Chat");
-app.UseMiddleware<GlobalErrorHandler>();
 
 app.Run();

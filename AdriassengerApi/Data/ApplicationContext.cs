@@ -1,4 +1,7 @@
-﻿using AdriassengerApi.Models;
+﻿using AdriassengerApi.Models.Friends;
+using AdriassengerApi.Models.Messages;
+using AdriassengerApi.Models.Notifications;
+using AdriassengerApi.Models.UserModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace AdriassengerApi.Data
@@ -9,7 +12,6 @@ namespace AdriassengerApi.Data
         public virtual DbSet<Messages> messages { get; set; }
         public virtual DbSet<Friend> friends { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Connection> Connections { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
     }
 }

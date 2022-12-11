@@ -12,9 +12,8 @@ export default function useFriends() {
   const { enqueueSnackbar } = useSnackbar()
   const { request, isLoading } = useFetch()
 
-  const loadFriends = async (userId: number) => {
-    const res = await request<Friend[]>('/Friends/' + userId)
-
+  const loadFriends = async () => {
+    const res = await request<Friend[]>('/Friends')
     setFriendStore((curr) => ({ ...curr, friends: res.data }))
   }
 
@@ -36,8 +35,8 @@ export default function useFriends() {
     enqueueSnackbar('Request has sent!', { variant: 'success' })
   }
 
-  const setCurrentTextingFriend = (id: number) => {
-    setFriendStore({ ...friendStore, currentTextingFriend: id })
+  const setCurrentTextingFriend = (id: number | null) => {
+    setFriendStore((prev) => ({ ...prev, currentTextingFriend: id }))
   }
 
   const deleteFriend = async (id: number) => {
@@ -48,6 +47,10 @@ export default function useFriends() {
     }
   }
 
+  const friendExists = (id: number) => {
+    return friendStore.friends.some((friend) => friend.id === id)
+  }
+
   const setLastMessage = (message: Message) => {
     setFriendStore((prev) => ({
       ...prev,
@@ -55,6 +58,24 @@ export default function useFriends() {
         friend.id === message.receiverId || friend.id === message.senderId
           ? { ...friend, lastMessage: message.message }
           : friend
+      ),
+    }))
+  }
+
+  const decreaseUnseenMessages = (id: number) => {
+    setFriendStore((prev) => ({
+      ...prev,
+      friends: prev.friends.map((friend) =>
+        friend.id === id ? { ...friend, unseenMessagesCount: friend.unseenMessagesCount - 1 } : friend
+      ),
+    }))
+  }
+
+  const increaseUnseenMessages = (id: number) => {
+    setFriendStore((prev) => ({
+      ...prev,
+      friends: prev.friends.map((friend) =>
+        friend.id === id ? { ...friend, unseenMessagesCount: friend.unseenMessagesCount + 1 } : friend
       ),
     }))
   }
@@ -71,5 +92,8 @@ export default function useFriends() {
     deleteFriend,
     setFriendStore,
     setLastMessage,
+    friendExists,
+    decreaseUnseenMessages,
+    increaseUnseenMessages,
   }
 }

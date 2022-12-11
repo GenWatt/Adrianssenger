@@ -1,4 +1,5 @@
 ﻿using AdriassengerApi.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 public class Repository<T> : IRepository<T> where T : class
@@ -29,9 +30,9 @@ public class Repository<T> : IRepository<T> where T : class
     {
         return _context.Set<T>().ToList();
     }
-    public T? GetById(int id)
+    public async Task<T?> GetById(int id)
     {
-        return _context.Set<T>().Find(id);
+        return await _context.Set<T>().FindAsync(id);
     }
     public void Remove(T entity)
     {
@@ -40,5 +41,14 @@ public class Repository<T> : IRepository<T> where T : class
     public void RemoveRange(IEnumerable<T> entities)
     {
         _context.Set<T>().RemoveRange(entities);
+    }
+    public void UpdateAsync(T entity)
+    {
+        _context.Entry(entity).State = EntityState.Modified;
+    }
+
+    public async Task SaveAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 }

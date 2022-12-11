@@ -35,7 +35,7 @@ export default function FileInput({
       <label htmlFor={id} onClick={focusOnInput}>
         {preview && (
           <Grid my={1} container justifyContent="center">
-            <img style={{ width: '15vw' }} src={preview} alt="preview" />
+            <img style={{ width: theme.spacing(20) }} src={preview} alt="preview" />
           </Grid>
         )}
         <Button style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }} variant="contained">

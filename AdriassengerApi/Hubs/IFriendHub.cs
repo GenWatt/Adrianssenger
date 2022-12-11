@@ -1,5 +1,6 @@
-﻿using AdriassengerApi.Models;
-using AdriassengerApi.Utils;
+﻿using AdriassengerApi.Models.Messages;
+using AdriassengerApi.Models.Notifications;
+using AdriassengerApi.Models.Friends;
 
 namespace AdriassengerApi.Hubs
 {
@@ -12,5 +13,7 @@ namespace AdriassengerApi.Hubs
         Task RemoveNotification(int id);
         Task RemoveFriend(int id);
         Task SendMessage(Messages message);
+        Task SeenMessage(int senderId, int messageId);
+        Task ReciverSeenMessage(int id);
     }
 }

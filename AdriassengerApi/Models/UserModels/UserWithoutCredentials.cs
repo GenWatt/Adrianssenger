@@ -1,4 +1,6 @@
-﻿namespace AdriassengerApi.Models.UserModels
+﻿using AdriassengerApi.Models.Friends;
+
+namespace AdriassengerApi.Models.UserModels
 {
     public class UserWithoutCredentials
     {

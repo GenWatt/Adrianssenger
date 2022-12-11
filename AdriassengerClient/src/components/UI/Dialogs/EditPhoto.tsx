@@ -1,6 +1,6 @@
 import { Avatar, Dialog, DialogContent, DialogTitle, Grid, useTheme } from '@mui/material'
 import { useSnackbar } from 'notistack'
-import React from 'react'
+import React, { useState } from 'react'
 import { UserHeaderData } from '../../../global'
 import useFetch from '../../../hooks/useFetch'
 import useFile from '../../../hooks/useFile'
@@ -14,6 +14,7 @@ type EditPhotoProps = { isOpen: boolean; handleClose: () => void }
 const schema = [{ type: 'file', label: 'Choose profile image', name: 'profilePicture', id: 'profilePicture' }]
 
 export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
+  const [preview, setPreview] = useState('')
   const { user, updateUser } = useUser()
   const { request } = useFetch()
   const { enqueueSnackbar } = useSnackbar()
@@ -30,6 +31,10 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
     }
   }
 
+  const handleFileChange = (preview: string) => {
+    setPreview(preview)
+  }
+
   return (
     <Dialog open={isOpen} onClose={handleClose}>
       <IconButton
@@ -43,11 +48,11 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
         <Grid container justifyContent="center">
           <Avatar
             style={{ width: theme.spacing(20), height: theme.spacing(20) }}
-            src={getStaticFile(user.avatarUrl)}
+            src={preview || getStaticFile(user.avatarUrl)}
           ></Avatar>
         </Grid>
 
-        <Form schema={schema} onSubmit={handleSubmit} />
+        <Form schema={schema} onSubmit={handleSubmit} onFileChange={handleFileChange} showPreview={false} />
       </DialogContent>
     </Dialog>
   )

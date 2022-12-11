@@ -1,19 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AdriassengerApi.Data;
-using AdriassengerApi.Models;
 using Microsoft.AspNetCore.Authorization;
-using AdriassengerApi.Utils;
-using AdriassengerApi.ViewModels;
 using AdriassengerApi.Services;
 using AdriassengerApi.Models.UserModels;
 using AdriassengerApi.Repository.UserRepo;
-using AdriassengerApi.Utils.Response;
-
-public class FriendWithId
-{
-    public int FriendId { get; set; }
-}
+using AdriassengerApi.Models.Responses;
 
 namespace AdriassengerApi.Controllers
 {
@@ -38,13 +30,13 @@ namespace AdriassengerApi.Controllers
         public async Task<ActionResult<IEnumerable<SearchUser>>> GetSearchUsers(string searchText)
         {
             var currentUser = UserManager.GetCurrentUser(HttpContext);
-            if (currentUser == null) return Unauthorized("User not log in");
+            if (currentUser is null) return Unauthorized("User not log in");
             var users = await (from u in _context.Users
                         where u.Id != currentUser.Id && u.UserName.Contains(searchText) &&
                         !_context.friends.Any(f => (currentUser.Id == f.UserId && f.SecondUserId == u.Id) || (f.UserId == u.Id && currentUser.Id == f.SecondUserId))
                         select new SearchUser { Id = u.Id, UserName = u.UserName }).ToArrayAsync();
 
-            return Ok(new Response<IEnumerable<SearchUser>>(true, "Users sended", users));
+            return Ok(new SuccessResponse<IEnumerable<SearchUser>> { Message = "Users sended", Data = users });
         }
 
         // PUT: api/Users/5
@@ -52,9 +44,9 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<IActionResult> PutUser(int id, [FromForm] EditUserView user)
         {
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var currentUser = await _userRepository.GetById(id);
 
-            if (currentUser == null) return NotFound();
+            if (currentUser is null) return NotFound("Not found user to update");
 
             if (user.ProfilePicture is not null)
             {
@@ -69,7 +61,7 @@ namespace AdriassengerApi.Controllers
             }
 
             _userRepository.Update(currentUser);
-            await _userRepository.SaveAsync();
+            await _context.SaveChangesAsync();
             
             return Ok(new SuccessResponse<UserWithoutCredentials> { Message = "Successfully edited user", Data = new UserWithoutCredentials(currentUser) });
         }
@@ -78,25 +70,17 @@ namespace AdriassengerApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userRepository.GetById(id);
+
             if (user == null)
             {
-                return NotFound();
+                return NotFound("Not found user to delete");
             }
 
-            _context.Users.Remove(user);
+            _userRepository.Remove(user);
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -1,13 +1,10 @@
 ﻿using AdriassengerApi.Data;
-using AdriassengerApi.Models;
+using AdriassengerApi.Models.Responses;
 using AdriassengerApi.Models.UserModels;
 using AdriassengerApi.Repository.UserRepo;
 using AdriassengerApi.Services;
-using AdriassengerApi.Utils.Response;
-using AdriassengerApi.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace AdriassengerApi.Controllers
@@ -39,10 +36,10 @@ namespace AdriassengerApi.Controllers
             {
                 var userExists = await _context.Users.FirstOrDefaultAsync(u => u.UserName == model.UserName || u.Email == model.Email);
 
-                if (userExists != null)
+                if (userExists is not null)
                 {
                     ModelState.AddModelError("userName", "User already exists");
-                    return BadRequest(new ErrorReponse<IEnumerable<ModelError>> { Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                    return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
                 }
 
                 var user = new User
@@ -60,11 +57,11 @@ namespace AdriassengerApi.Controllers
                 }
 
                 _userRepository.Add(user);
-                await _userRepository.SaveAsync();
+                await _context.SaveChangesAsync();
 
                 return new SuccessResponse<User> { Message = "Successfully registered", Data = user };
             }
-            return BadRequest(new ErrorReponse<IEnumerable<ModelError>> { Errors = ModelState.Values.SelectMany(v => v.Errors) });
+            return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
         }
 
         [HttpPost("Login")]
@@ -75,10 +72,10 @@ namespace AdriassengerApi.Controllers
             {
                 var currentUser = await GetUserFromCredentials(user);
 
-                if (currentUser == null)
+                if (currentUser is null)
                 {
-                    ModelState.AddModelError("", "Invalid Login attempt.");
-                    return Conflict(new ErrorReponse<IEnumerable<ModelError>> { Errors = ModelState.Values.SelectMany(v => v.Errors) });
+                    ModelState.AddModelError("UserName", "Invalid Login attempt.");
+                    return Conflict(ModelState.Values.SelectMany(v => v.Errors));
                 }
 
                 var accessToken = _tokenManager.GetAccessToken(currentUser);
@@ -86,24 +83,24 @@ namespace AdriassengerApi.Controllers
 
                 currentUser.AccessToken = accessToken;
                 currentUser.RefreshToken = refreshToken;
-                currentUser.RefreshTokenExpirationDate = DateTime.Now.AddMinutes(double.Parse(_config["Jwt:RefreshTokenExpiration"]));
+                currentUser.RefreshTokenExpirationDate = DateTime.Now.AddHours(double.Parse(_config["Jwt:RefreshTokenExpiration"]));
                 currentUser.IsAccessTokenValid = true;
 
                 SetTokensToCookies(accessToken, refreshToken);
 
                 _userRepository.Update(currentUser);
-                await _userRepository.SaveAsync();
+                await _context.SaveChangesAsync();
 
                 return Ok(new SuccessResponse<UserWithoutCredentials> { Message = "Successfully log in", Data = new UserWithoutCredentials(currentUser) });
             }
-            return BadRequest(new ErrorReponse<IEnumerable<ModelError>> { Errors = ModelState.Values.SelectMany(v => v.Errors) });
+            return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
         }
 
         private async Task<User?> GetUserFromCredentials(LoginView user)
         {
             var currentUser = await _userRepository.GetByUsername(user.UserName);
 
-            if (currentUser != null && BCrypt.Net.BCrypt.Verify(user.Password, currentUser.Password)) return currentUser;
+            if (currentUser is not null && BCrypt.Net.BCrypt.Verify(user.Password, currentUser.Password)) return currentUser;
 
             return currentUser;
         }
@@ -122,18 +119,18 @@ namespace AdriassengerApi.Controllers
 
                 currentUser.RefreshToken = newRefreshToken;
                 currentUser.AccessToken = newAccessToken;
-                currentUser.RefreshTokenExpirationDate = DateTime.Now.AddMinutes(double.Parse(_config["Jwt:RefreshTokenExpiration"]));
+                currentUser.RefreshTokenExpirationDate = DateTime.Now.AddHours(double.Parse(_config["Jwt:RefreshTokenExpiration"]));
                 currentUser.IsAccessTokenValid = true;
 
                 SetTokensToCookies(newAccessToken, newRefreshToken);
 
                 _userRepository.Update(currentUser);
-                await _userRepository.SaveAsync();
+                await _context.SaveChangesAsync();
 
                 return Ok(new SuccessResponse<string> { Data = "Refresh Token", Message = "Success" });
             }
 
-            return BadRequest();
+            return Unauthorized("Your refresh token expired");
         }
  
         [HttpGet("Logout")]
@@ -154,7 +151,7 @@ namespace AdriassengerApi.Controllers
                 SetTokensToCookies("", "");
 
                 _userRepository.Update(currentUser);
-                await _userRepository.SaveAsync();
+                await _context.SaveChangesAsync();
 
                 return Ok(new SuccessResponse<string> { Data = "Log out", Message = "Successully log out"});
             }

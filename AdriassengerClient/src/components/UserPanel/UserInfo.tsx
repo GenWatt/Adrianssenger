@@ -10,6 +10,7 @@ import EditPhoto from '../UI/Dialogs/EditPhoto'
 interface UserInfoProps {
   user: UserHeaderData
   type?: UserInfoTypes
+  onClose?: () => void
 }
 
 export enum UserInfoTypes {
@@ -28,7 +29,7 @@ const useStyles = makeStyles()((theme: Theme) => {
   }
 })
 
-export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: UserInfoProps) {
+export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER, onClose }: UserInfoProps) {
   const theme = useTheme()
   const { classes } = useStyles()
   const navigate = useNavigate()
@@ -37,7 +38,14 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
 
   const editPhoto = () => type === UserInfoTypes.CURRENT_USER && setIsEdit(true)
 
-  const onClose = () => setIsEdit(false)
+  const close = () => {
+    setIsEdit(false)
+  }
+
+  const goBack = () => {
+    onClose && onClose()
+    navigate('/home')
+  }
 
   return (
     <Grid
@@ -46,7 +54,7 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
       position="relative"
       p={1}
     >
-      <EditPhoto isOpen={isEdit} handleClose={onClose} />
+      <EditPhoto isOpen={isEdit} handleClose={close} />
       <Grid container>
         <Grid container>
           <Avatar onClick={editPhoto} src={getStaticFile(user.avatarUrl)} className="cursor-pointer" />
@@ -54,7 +62,7 @@ export default function UserInfo({ user, type = UserInfoTypes.CURRENT_USER }: Us
             {user.userName}
           </Typography>
         </Grid>
-        {type === UserInfoTypes.FRIEND && <CloseOutlined onClick={() => navigate('/')} className={classes.root} />}
+        {type === UserInfoTypes.FRIEND && <CloseOutlined onClick={goBack} className={classes.root} />}
       </Grid>
     </Grid>
   )

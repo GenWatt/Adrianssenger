@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios, { AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios'
-import { ApiErrors, ApiResponse, BasicResponse } from '../global'
+import { ApiError, ApiResponse, BasicResponse } from '../global'
 import { SERVER_ENDPOINT } from '../config'
 import { axiosInstance } from '../utils/ApiServices'
 import useText from './useText'
@@ -96,10 +96,10 @@ export default function useFetch() {
 
   function getErrorMessage(error: unknown) {
     if (axios.isAxiosError(error)) {
-      const errors = error as AxiosError<ApiErrors>
+      const errors = error as AxiosError<ApiError[]>
 
       if (errors.response && errors.response.data) {
-        return joinMessages(errors.response.data.errors)
+        return joinMessages(errors.response.data)
       }
       return 'Something goes wrong'
     }

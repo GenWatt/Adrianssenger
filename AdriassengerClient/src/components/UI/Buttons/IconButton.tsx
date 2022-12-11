@@ -15,10 +15,10 @@ const useStyles = makeStyles()((theme: Theme) => {
   }
 })
 
-export default function IconButton({ children, ...props }: IconButtonProps) {
+export default function IconButton({ children, className, ...props }: IconButtonProps) {
   const { classes } = useStyles()
   return (
-    <button className={classes.roots} {...props}>
+    <button className={`${className} ${classes.roots}`} {...props}>
       {children}
     </button>
   )

@@ -1,9 +1,8 @@
-import { Grid, List } from '@mui/material'
+import { List } from '@mui/material'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import useMesure from '../../hooks/useMesure'
 import { useNavigate, useParams } from 'react-router-dom'
 import FriendListItem from './FriendListItem'
-import useUser from '../../hooks/useUser'
 import useSignalR from '../../hooks/SignalR/useSignalR'
 import useNotifications from '../Notifications/useNotifications'
 import NotFound from '../UI/NotFound/NotFound'
@@ -19,7 +18,6 @@ export default function FrindList({ searchText }: FrindListProps) {
   const [message, setMessage] = useState<string>('You have no friends :-(')
   const { addNotification } = useNotifications()
   const { loadFriends, setCurrentTextingFriend, isLoading, friendStore } = useFriends()
-  const { user } = useUser()
   const { pixelsFromTopToElement } = useMesure()
   const signalR = useSignalR()
   const navigate = useNavigate()
@@ -43,7 +41,7 @@ export default function FrindList({ searchText }: FrindListProps) {
 
   const getFriends = async () => {
     try {
-      await loadFriends(user.id)
+      await loadFriends()
     } catch (error) {
       setMessage('Something goes wrong with fetching friends')
     }
@@ -55,7 +53,7 @@ export default function FrindList({ searchText }: FrindListProps) {
 
   useEffect(() => {
     id && messageFriend(+id)
-  }, [])
+  }, [id])
 
   useEffect(() => {
     signalR.connection?.on('SendFriendRequest', addNotification)
@@ -70,7 +68,7 @@ export default function FrindList({ searchText }: FrindListProps) {
     <>
       {isLoading && <Loader />}
       {friendStore.friends.length && !isLoading ? (
-        <List ref={list} style={{ overflow: 'hidden auto', height: listHeight }}>
+        <List ref={list} style={{ overflow: 'hidden auto', height: listHeight, width: '100%' }}>
           {friendStore.friends
             .filter((friend) => friend.userName.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
             .map((friend) => (

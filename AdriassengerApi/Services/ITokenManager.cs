@@ -1,4 +1,4 @@
-﻿using AdriassengerApi.Models;
+﻿using AdriassengerApi.Models.UserModels;
 using System.Security.Claims;
 
 namespace AdriassengerApi.Services

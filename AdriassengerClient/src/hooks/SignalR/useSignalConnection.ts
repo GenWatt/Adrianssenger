@@ -6,13 +6,19 @@ import { Message } from '../../global'
 
 export default function useSignalConnection() {
   const { connection } = useSignalR()
-  const { removeFriend, acceptFriendRequest, rejectFriendRequest, setLastMessage } = useFriends()
+  const { removeFriend, acceptFriendRequest, rejectFriendRequest, setLastMessage, decreaseUnseenMessages } =
+    useFriends()
   const { removeNotification } = useNotifications()
-  const { addMessage } = useMessage()
+  const { addMessage, setSeenMessage } = useMessage()
 
   const lastMessage = (message: Message) => {
     addMessage(message)
     setLastMessage(message)
+  }
+
+  const seenMessage = (senderId: number, messageId: number) => {
+    decreaseUnseenMessages(senderId)
+    setSeenMessage(messageId)
   }
 
   const makeConnections = () => {
@@ -21,6 +27,8 @@ export default function useSignalConnection() {
     connection?.on('RemoveNotification', removeNotification)
     connection?.on('RemoveFriend', removeFriend)
     connection?.on('SendMessage', lastMessage)
+    connection?.on('SeenMessage', seenMessage)
+    connection?.on('ReciverSeenMessage', setSeenMessage)
   }
 
   const disconnect = () => {
@@ -29,6 +37,8 @@ export default function useSignalConnection() {
     connection?.off('RemoveNotification', removeNotification)
     connection?.off('RemoveFriend', removeFriend)
     connection?.off('SendMessage', lastMessage)
+    connection?.off('SeenMessage', seenMessage)
+    connection?.off('ReciverSeenMessage', setSeenMessage)
   }
 
   return { disconnect, makeConnections, connection }

@@ -13,9 +13,9 @@ import { makeStyles } from 'tss-react/mui'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Friend } from '../../global'
 import { Link } from 'react-router-dom'
-import useFriends from './useFriends'
 import { useState } from 'react'
 import RemoveFriend from '../UI/Dialogs/RemoveFriend'
+import useFile from '../../hooks/useFile'
 
 interface FriendListItemProps {
   isSelect?: boolean
@@ -49,6 +49,27 @@ const useStyles = makeStyles<{ isSelect?: boolean }>()((theme: Theme, props) => 
         backgroundColor: theme.palette.primary.dark,
       },
     },
+    unseenMessageBadge: {
+      backgroundColor: theme.palette.secondary.main,
+      width: theme.spacing(3),
+      height: theme.spacing(3),
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+    },
+    newMessage: {
+      animation: 'newMessage 2s ease infinite',
+      '@keyframes newMessage': {
+        '0%': {
+          backgroundColor: theme.palette.secondary.main,
+        },
+        '100%': {
+          backgroundColor: theme.palette.secondary.light,
+        },
+      },
+    },
   }
 })
 
@@ -57,6 +78,7 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [friendToDelete, setFriendToDelete] = useState<Friend | null>(null)
+  const { getStaticFile } = useFile()
 
   const handleClose = () => {
     setFriendToDelete(null)
@@ -71,7 +93,9 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
   const getClass = () => {
     let className = `${classes.roots} `
 
-    if (isSelect) className += classes.selected
+    if (isSelect) className += classes.selected + ' '
+
+    if (friend.unseenMessagesCount > 0) className += classes.newMessage + ' '
     return className
   }
 
@@ -79,7 +103,7 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
     <ListItem className={getClass() + ` ${className}`} {...props}>
       {friendToDelete && <RemoveFriend isOpen={isOpen} onClose={handleClose} friend={friendToDelete} />}
       <Link className={classes.link} to={`/messages/${friend.id}`}>
-        <Avatar src={friend.avatarUrl} />
+        <Avatar src={getStaticFile(friend.avatarUrl)} />
         <Grid container p={1} direction="column" flexGrow={1}>
           <ListItemText
             className="width-inherit"
@@ -93,7 +117,12 @@ export default function FriendListItem({ isSelect, className, friend, ...props }
           />
         </Grid>
       </Link>
-      <Grid>
+      <Grid container justifyContent="flex-end" alignItems="center">
+        {friend.unseenMessagesCount > 0 ? (
+          <ListItemIcon>
+            <div className={classes.unseenMessageBadge}>{friend.unseenMessagesCount}</div>
+          </ListItemIcon>
+        ) : null}
         <Tooltip title={`Delete ${friend.userName} from friends`}>
           <ListItemIcon className={classes.buttons} onClick={() => handleOpen(friend)}>
             <DeleteIcon />

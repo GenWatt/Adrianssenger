@@ -1,4 +1,4 @@
-import { Button, Grid, ListItem, Theme, Typography, useTheme } from '@mui/material'
+import { Button, Grid, ListItem, Theme, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { NotificationState } from '../../global'
 import useFetch from '../../hooks/useFetch'
@@ -24,15 +24,15 @@ const useStyles = makeStyles()((theme: Theme) => {
     },
     closeIcon: {
       position: 'absolute',
-      right: theme.spacing(0.5),
-      top: theme.spacing(0.5),
+      right: theme.spacing(0.1),
+      top: theme.spacing(0.1),
+      zIndex: 4,
     },
   }
 })
 
 export default function NotificationItem({ notification }: NotificationItemProps) {
   const { classes } = useStyles()
-  const theme = useTheme()
   const { request, isLoading } = useFetch()
   const { getDateString } = useText()
   const { deleteNotificationApi, removeNotification } = useNotifications()
@@ -49,14 +49,18 @@ export default function NotificationItem({ notification }: NotificationItemProps
     } catch (error) {}
   }
 
-  const deleteNotification = (id: number) => {
-    deleteNotificationApi(id)
-    removeNotification(id)
+  const deleteNotification = (notification: NotificationState) => {
+    if (notification.rejectUrl) {
+      return rejectRequest(notification)
+    }
+
+    deleteNotificationApi(notification.id)
+    removeNotification(notification.id)
   }
 
   return (
     <ListItem className={classes.roots}>
-      <IconButton onClick={() => deleteNotification(notification.id)} className={classes.closeIcon}>
+      <IconButton onClick={() => deleteNotification(notification)} className={classes.closeIcon}>
         <CloseIcon />
       </IconButton>
       <Grid container direction="column">

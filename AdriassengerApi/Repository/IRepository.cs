@@ -7,7 +7,8 @@ public interface IRepository<T> where T : class
     public void Update(T entity);
     IEnumerable<T> Find(Expression<Func<T, bool>> expression);
     IEnumerable<T> GetAll();
-    T? GetById(int id);
+    Task<T?> GetById(int id);
     void Remove(T entity);
     void RemoveRange(IEnumerable<T> entities);
+    Task SaveAsync();
 }

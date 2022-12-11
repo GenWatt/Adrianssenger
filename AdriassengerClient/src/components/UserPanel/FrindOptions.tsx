@@ -17,7 +17,7 @@ export default function FriendOptions({ handleSearch, searchText }: Props) {
 
   return (
     <>
-      <Grid container alignItems="center" p={1}>
+      <Grid container alignItems="center" flexWrap="nowrap" p={1}>
         <SearchIcon />
         <TextField
           style={{ flexGrow: 1 }}

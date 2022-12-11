@@ -28,6 +28,7 @@ export default function Login() {
       updateUser(res.data)
       navigate('/')
     } catch (error) {
+      console.log(error)
       setErrorMessage(getErrorMessage(error))
     }
   }

@@ -1,11 +1,11 @@
 ﻿using AdriassengerApi.Data;
-using AdriassengerApi.Models;
-using AdriassengerApi.Utils;
+using AdriassengerApi.Models.Notifications;
+using AdriassengerApi.Models.Responses;
+using AdriassengerApi.Repository.NotificationsRepo;
+using AdriassengerApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace AdriassengerApi.Controllers
 {
@@ -14,55 +14,33 @@ namespace AdriassengerApi.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly ApplicationContext _context;
-
-        public NotificationController(ApplicationContext context)
+        private readonly INotificationsRepository _notificationRepository;
+        public NotificationController(ApplicationContext context, INotificationsRepository notificationsRepository)
         {
             _context = context;
+            _notificationRepository = notificationsRepository;  
         }
 
         // GET: api/<NotificationController>
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<Notification>>> Get()
+        public async Task<ActionResult<SuccessResponse<List<Notification>>>> Get()
         {
             var currentUser = UserManager.GetCurrentUser(HttpContext);
-            if (currentUser == null) return Unauthorized("Can not send notifications user unauthorized");
+            if (currentUser is null) return Unauthorized("Can not send notifications user unauthorized");
             var notifications = await _context.Notifications.Where(n => n.UserId == currentUser.Id && n.Seen == false).OrderBy(n => n.CreatedAt).ToListAsync();
 
-            return Ok(new Response<List<Notification>>(true, "Notifications sended", notifications));
-        }
-
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<ActionResult<Notification>> Seen(int id)
-        {
-            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
-            _context.Entry(notification).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return Ok(new Response<Notification>(true, "Notifications sended", notification));
-        }
-
-        // GET api/<NotificationController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
+            return Ok(new SuccessResponse<List<Notification>> { Message = "Notifications sended", Data = notifications });
         }
 
         // POST api/<NotificationController>
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Response<string>>> Post([FromBody] Notification notification)
+        public async Task<ActionResult<SuccessResponse<string>>> Post([FromBody] Notification notification)
         {
-            _context.Notifications.Add(notification);
+            _notificationRepository.Add(notification);
             await _context.SaveChangesAsync();
-            return Ok(new Response<string>(true, "Notification sent", ""));
-        }
-
-        // PUT api/<NotificationController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
+            return Ok(new SuccessResponse<string> { Message = "Notification sent", Data = "" });
         }
 
         // DELETE api/<NotificationController>/5
@@ -70,13 +48,14 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
+            var notification = await _notificationRepository.GetById(id);
 
             if (notification is null)
             {
-                return NotFound();
+                return NotFound("Notification not found to delete");
             }
-            _context.Notifications.Remove(notification);
+
+            _notificationRepository.Remove(notification);
             await _context.SaveChangesAsync();
 
             return NoContent();

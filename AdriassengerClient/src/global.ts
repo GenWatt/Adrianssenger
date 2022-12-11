@@ -9,25 +9,13 @@ export enum ValidationRuleType {
   ISEMAIL = 'isEmail',
 }
 
-export enum ErrorTypes {
-  FORM,
-  INTERVAL,
-  USER,
-  AUTH,
-}
-
 export interface BasicResponse {
   success: boolean
   message: string
 }
 
-export interface ApiErrors {
-  errors: ApiError[]
-}
-
 export interface ApiError {
   errorMessage: string
-  type: ErrorTypes
 }
 
 export interface ApiResponse<T, R = ApiError> extends BasicResponse {
@@ -54,6 +42,7 @@ export interface Friend extends UserHeaderData {
   friendId: number
   createAt: Date
   requestAccepted: boolean
+  unseenMessagesCount: number
 }
 
 export interface SearchUser {

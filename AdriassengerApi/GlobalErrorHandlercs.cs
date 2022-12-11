@@ -1,16 +1,12 @@
-﻿using AdriassengerApi.Exceptions;
-using AdriassengerApi.Exceptions.ErrorService;
-
-namespace AdriassengerApi
+﻿namespace AdriassengerApi
 {
     public class GlobalErrorHandler
     {
         private readonly RequestDelegate _next;
-        private readonly IErrorService _errorService;
-        public GlobalErrorHandler(RequestDelegate next, IErrorService errorService)
+
+        public GlobalErrorHandler(RequestDelegate next)
         {
             _next = next;
-            _errorService = errorService;
         }
         public async Task Invoke(HttpContext context)
         {
@@ -27,7 +23,7 @@ namespace AdriassengerApi
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = 500;
-            return context.Response.WriteAsJsonAsync(_errorService.AddError(new IntervalError()).GetErrorResponse());
+            return context.Response.WriteAsJsonAsync("Server error");
         }
     }
 }

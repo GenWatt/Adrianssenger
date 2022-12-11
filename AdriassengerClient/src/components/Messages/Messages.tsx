@@ -1,5 +1,5 @@
 import { List, Grid, Theme } from '@mui/material'
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useEffect } from 'react'
 import type { Message } from '../../global'
 import useMessage from './useMessage'
 import MessageItem from './MessageItem'
@@ -19,24 +19,71 @@ const useStyles = makeStyles()((theme: Theme) => {
   }
 })
 
-export default function Messages({ messages }: MessagesProps) {
+let observer: IntersectionObserver | null = null
+
+function Messages({ messages }: MessagesProps) {
   const { classes } = useStyles()
-  const ref = useRef<any | null>(null)
+  const containerRef = useRef<any | null>(null)
   const listRef = useRef<any | null>(null)
-  const { messagesStore } = useMessage()
+  const firstUpdate = useRef(true)
+  const { getMessageById, seenMessageRequest } = useMessage()
 
   const setScroll = () => {
     if (listRef.current) {
-      ref.current.scrollTo({ top: listRef.current.scrollHeight })
+      containerRef.current.scrollTo({ top: listRef.current.scrollHeight })
+    }
+  }
+
+  const handleIntersection = (entry: IntersectionObserverEntry) => {
+    if (entry.isIntersecting) {
+      const target = entry.target as HTMLDivElement
+      const messageId = target.dataset.messageId
+
+      if (messageId) {
+        const message = getMessageById(+messageId)
+
+        message && seenMessageRequest(message)
+      }
+    }
+  }
+
+  const AddEntries = (entries: IntersectionObserverEntry[]) => entries.forEach(handleIntersection)
+
+  const setupObserverForMessagesItem = () => {
+    if (listRef.current) {
+      const messagesEl = listRef.current.children as HTMLDivElement[]
+
+      if (messagesEl) {
+        observer = new IntersectionObserver(AddEntries)
+
+        for (const messageEl of messagesEl) {
+          observer.observe(messageEl)
+        }
+      }
     }
   }
 
   useLayoutEffect(() => {
-    setScroll()
-  }, [messagesStore])
+    if (messages.length) {
+      firstUpdate.current && setScroll()
+      setupObserverForMessagesItem()
+      firstUpdate.current = false
+    }
+
+    return () => {
+      observer && observer.disconnect()
+      observer = null
+    }
+  }, [messages])
+
+  useEffect(() => {
+    return () => {
+      firstUpdate.current = true
+    }
+  }, [])
 
   return (
-    <Grid height="1px" overflow="auto" container ref={ref} flexGrow={1}>
+    <Grid height="1px" overflow="auto" container ref={containerRef} flexGrow={1}>
       <List ref={listRef} className={classes.list}>
         {messages.map((message) => (
           <MessageItem key={message.id} message={message} />
@@ -45,3 +92,5 @@ export default function Messages({ messages }: MessagesProps) {
     </Grid>
   )
 }
+
+export default Messages
