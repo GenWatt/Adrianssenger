@@ -30,6 +30,7 @@ export default function useSignalR() {
       isDisconecting = true
       await refresh()
         .then(() => newConnection.start())
+        .catch(() => enqueueSnackbar('Authorization expired', { variant: 'error' }))
         .finally(() => (isDisconecting = false))
     })
 
