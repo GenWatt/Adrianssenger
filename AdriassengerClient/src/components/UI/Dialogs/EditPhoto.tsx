@@ -22,8 +22,8 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
   const theme = useTheme()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     try {
-      e.preventDefault()
       const res = await request<UserHeaderData>('/Users/' + user.id, 'PUT', new FormData(e.target as HTMLFormElement))
       updateUser(res.data)
       enqueueSnackbar('Updated photo!', { variant: 'success' })

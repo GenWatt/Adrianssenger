@@ -23,7 +23,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 export default function FileButton({ children, ...rest }: FileButtonProps) {
   const { classes } = useStyles()
   return (
-    <button className={classes.button} {...rest}>
+    <button type="button" className={classes.button} {...rest}>
       {children}
     </button>
   )
