@@ -9,12 +9,13 @@ let isDisconecting = false
 export default function useSignalR() {
   const [connection, setConnection] = useState<HubConnection>()
   const { enqueueSnackbar } = useSnackbar()
-  const { refresh, isUserLogIn, user } = useUser()
+  const { refresh, user } = useUser()
 
   const onClose = useCallback(
     (newConnection: HubConnection) => {
-      if (isDisconecting || !user.isLogIn) return
+      if (isDisconecting) return
       isDisconecting = true
+
       refresh()
         .then(() => newConnection.start())
         .catch(() => enqueueSnackbar('Authorization expired', { variant: 'error' }))
@@ -24,8 +25,6 @@ export default function useSignalR() {
   )
 
   useEffect(() => {
-    if (!isUserLogIn()) return
-
     const newConnection = new HubConnectionBuilder()
       .withUrl(SERVER_ENDPOINT + '/Chat', { withCredentials: true })
       .withAutomaticReconnect()

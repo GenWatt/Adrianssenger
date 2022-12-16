@@ -20,6 +20,7 @@ function App() {
 
   useEffect(() => {
     makeConnections()
+    console.log('hej')
 
     return () => {
       disconnect()
