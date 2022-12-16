@@ -1,5 +1,6 @@
-import { Button, FormControl, Grid, Input, InputProps, useTheme } from '@mui/material'
+import { FormControl, Grid, Input, InputProps, useTheme } from '@mui/material'
 import React, { CSSProperties, useRef } from 'react'
+import FileButton from '../UI/Buttons/FileButton'
 import FormErrors from './FormErrors'
 
 type FileInputProps = {
@@ -38,9 +39,7 @@ export default function FileInput({
             <img style={{ width: theme.spacing(20) }} src={preview} alt="preview" />
           </Grid>
         )}
-        <Button style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }} variant="contained">
-          {label}
-        </Button>
+        <FileButton style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }}>{label}</FileButton>
         <Input
           ref={inputRef}
           style={{ display: 'none' }}

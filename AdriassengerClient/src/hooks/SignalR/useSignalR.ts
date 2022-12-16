@@ -1,20 +1,30 @@
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr'
 import { useSnackbar } from 'notistack'
-import { useEffect, useState } from 'react'
-import { useRecoilValue } from 'recoil'
+import { useCallback, useEffect, useState } from 'react'
 import { SERVER_ENDPOINT } from '../../config'
-import { isAuthenticate } from '../../store/user'
 import useUser from '../useUser'
+
+let isDisconecting = false
 
 export default function useSignalR() {
   const [connection, setConnection] = useState<HubConnection>()
-  const isAuth = useRecoilValue(isAuthenticate)
   const { enqueueSnackbar } = useSnackbar()
-  const { refresh } = useUser()
+  const { refresh, isUserLogIn, user } = useUser()
+
+  const onClose = useCallback(
+    (newConnection: HubConnection) => {
+      if (isDisconecting || !user.isLogIn) return
+      isDisconecting = true
+      refresh()
+        .then(() => newConnection.start())
+        .catch(() => enqueueSnackbar('Authorization expired', { variant: 'error' }))
+        .finally(() => (isDisconecting = false))
+    },
+    [user.isLogIn]
+  )
 
   useEffect(() => {
-    if (!isAuth) return
-    let isDisconecting = false
+    if (!isUserLogIn()) return
 
     const newConnection = new HubConnectionBuilder()
       .withUrl(SERVER_ENDPOINT + '/Chat', { withCredentials: true })
@@ -25,23 +35,17 @@ export default function useSignalR() {
       enqueueSnackbar('Tring to reconenct...')
     })
 
-    newConnection.onclose(async () => {
-      if (isDisconecting) return
-      isDisconecting = true
-      await refresh()
-        .then(() => newConnection.start())
-        .catch(() => enqueueSnackbar('Authorization expired', { variant: 'error' }))
-        .finally(() => (isDisconecting = false))
-    })
+    newConnection.onclose(() => onClose(newConnection))
 
     newConnection.start().catch((err) => console.log(err))
 
     setConnection(newConnection)
 
     return () => {
+      isDisconecting = false
       newConnection.stop()
     }
-  }, [isAuth])
+  }, [user.isLogIn])
 
   return { connection }
 }

@@ -27,6 +27,8 @@ export interface UserHeaderData {
   userName: string
   id: number
   avatarUrl: string
+  isLogIn: boolean
+  isRefreshing: boolean
 }
 
 export interface User extends UserHeaderData {

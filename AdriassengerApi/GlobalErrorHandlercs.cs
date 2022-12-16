@@ -23,6 +23,7 @@
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = 500;
+            Console.WriteLine(exception.Message);
             return context.Response.WriteAsJsonAsync("Server error");
         }
     }

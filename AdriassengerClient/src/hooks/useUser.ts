@@ -10,17 +10,34 @@ export default function useUser() {
   const { setObj } = useLocalStorage()
 
   const refresh = async () => {
-    return await axios({
+    setUser((prev) => ({ ...prev, isRefreshing: true }))
+    const res = await axios({
       url: SERVER_ENDPOINT + '/Account/Refresh',
       withCredentials: true,
       method: 'POST',
     })
+
+    setUser((prev) => ({ ...prev, isRefreshing: false }))
+    return res
   }
 
-  const updateUser = (user: UserHeaderData) => {
-    setUser(user)
+  const isRefreshing = () => user.isRefreshing
+
+  const login = (user: UserHeaderData) => {
+    setUser((prev) => ({ ...prev, ...user, isLogIn: true }))
     setObj<UserHeaderData>('user', user)
   }
 
-  return { user, refresh, setUser, updateUser }
+  const loadUser = (user: UserHeaderData) => setUser((prev) => ({ ...prev, ...user }))
+
+  const updateUser = (user: UserHeaderData) => {
+    setObj<UserHeaderData>('user', user)
+    loadUser(user)
+  }
+
+  const isUserLogIn = () => {
+    return user.isLogIn
+  }
+
+  return { user, refresh, setUser, login, isUserLogIn, isRefreshing, loadUser, updateUser }
 }

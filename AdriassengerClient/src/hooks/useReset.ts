@@ -16,16 +16,16 @@ export default function useReset() {
   const navigate = useNavigate()
 
   const reset = () => {
+    setUser(initialUserValue)
+    setObj<string>('user', '')
     setNotifications(initialNotificationState)
     setMessages(initialMessagesValue)
-    setUser(initialUserValue)
     setFriends(initialFriendsValue)
-    setObj<string>('user', '')
   }
 
   const resetAndNavigateToLoginPage = () => {
     reset()
-    navigate('/login')
+    navigate('/login', { replace: true })
   }
 
   return { reset, resetAndNavigateToLoginPage }

@@ -19,27 +19,7 @@ namespace AdriassengerApi.Migrations
                 .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("AdriassengerApi.Models.Connection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConnectionId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Connections");
-                });
-
-            modelBuilder.Entity("AdriassengerApi.Models.Friend", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Friends.Friend", b =>
                 {
                     b.Property<int>("FriendId")
                         .ValueGeneratedOnAdd()
@@ -73,7 +53,7 @@ namespace AdriassengerApi.Migrations
                     b.ToTable("friends");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.Messages", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Messages.Messages", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -107,7 +87,7 @@ namespace AdriassengerApi.Migrations
                     b.ToTable("messages");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.Notification", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Notifications.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -157,7 +137,7 @@ namespace AdriassengerApi.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.User", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.UserModels.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -198,26 +178,15 @@ namespace AdriassengerApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.Connection", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Friends.Friend", b =>
                 {
-                    b.HasOne("AdriassengerApi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AdriassengerApi.Models.Friend", b =>
-                {
-                    b.HasOne("AdriassengerApi.Models.User", "SecondUser")
+                    b.HasOne("AdriassengerApi.Models.UserModels.User", "SecondUser")
                         .WithMany()
                         .HasForeignKey("SecondUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AdriassengerApi.Models.User", "User")
+                    b.HasOne("AdriassengerApi.Models.UserModels.User", "User")
                         .WithMany("Friends")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -228,15 +197,15 @@ namespace AdriassengerApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.Messages", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Messages.Messages", b =>
                 {
-                    b.HasOne("AdriassengerApi.Models.User", "Receiver")
+                    b.HasOne("AdriassengerApi.Models.UserModels.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AdriassengerApi.Models.User", "Sender")
+                    b.HasOne("AdriassengerApi.Models.UserModels.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -247,9 +216,9 @@ namespace AdriassengerApi.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.Notification", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.Notifications.Notification", b =>
                 {
-                    b.HasOne("AdriassengerApi.Models.User", "User")
+                    b.HasOne("AdriassengerApi.Models.UserModels.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -258,7 +227,7 @@ namespace AdriassengerApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AdriassengerApi.Models.User", b =>
+            modelBuilder.Entity("AdriassengerApi.Models.UserModels.User", b =>
                 {
                     b.Navigation("Friends");
                 });

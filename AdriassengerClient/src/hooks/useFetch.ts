@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import axios, { AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios'
 import { ApiError, ApiResponse, BasicResponse } from '../global'
 import { SERVER_ENDPOINT } from '../config'
@@ -19,7 +19,7 @@ const axiosConfig: AxiosRequestConfig = {
 
 export default function useFetch() {
   const [isLoading, setLoading] = useState(false)
-  const { refresh } = useUser()
+  const { refresh, isUserLogIn } = useUser()
   const { joinMessages } = useText()
   const { enqueueSnackbar } = useSnackbar()
   const { resetAndNavigateToLoginPage } = useReset()
@@ -28,52 +28,54 @@ export default function useFetch() {
     return 'data' in response
   }
 
+  const responseInterseptorOnError = useCallback((error: any) => {
+    const originalRequest = error.config
+
+    if (error.code === 'ERR_NETWORK') {
+      return enqueueSnackbar('Can not connect to server', { variant: 'error' })
+    }
+
+    console.log(isUserLogIn())
+
+    if (error.response && error.response.status && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+      if (!isRefreshing) {
+        isRefreshing = true
+        refresh()
+          .then((data: any) => {
+            if (axios.isAxiosError(data)) {
+              resetAndNavigateToLoginPage()
+            } else requestsToRefresh.forEach((cb: any) => cb())
+          })
+          .catch(() => {
+            requestsToRefresh = []
+            resetAndNavigateToLoginPage()
+          })
+          .finally(() => {
+            requestsToRefresh = []
+            isRefreshing = false
+          })
+      }
+
+      return new Promise((resolve, reject) => {
+        requestsToRefresh.push(() => {
+          resolve(axios(originalRequest))
+          reject(error)
+        })
+      })
+    }
+    return error
+  }, [])
+
   useEffect(() => {
     //Response interceptor for API calls
     const responseInterseptor = axiosInstance.interceptors.response.use(
       (response) => response,
-      async (error) => {
-        const originalRequest = error.config
-
-        if (error.code === 'ERR_NETWORK') {
-          return enqueueSnackbar('Can not connect to server', { variant: 'error' })
-        }
-
-        if (error.response && error.response.status && error.response.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true
-          if (!isRefreshing) {
-            isRefreshing = true
-            refresh()
-              .then((data: any) => {
-                if (axios.isAxiosError(data)) {
-                  resetAndNavigateToLoginPage()
-                } else requestsToRefresh.forEach((cb: any) => cb())
-              })
-              .catch(() => {
-                requestsToRefresh = []
-                resetAndNavigateToLoginPage()
-              })
-              .finally(() => {
-                requestsToRefresh = []
-                isRefreshing = false
-              })
-          }
-
-          return new Promise((resolve, reject) => {
-            requestsToRefresh.push(() => {
-              resolve(axios(originalRequest))
-              reject(error)
-            })
-          })
-        }
-        return error
-      }
+      responseInterseptorOnError
     )
 
     return () => {
       axiosInstance.interceptors.response.eject(responseInterseptor)
-      // console.log('boty')
-      // controller.abort()
     }
   }, [])
 
@@ -101,7 +103,6 @@ export default function useFetch() {
       if (errors.response && errors.response.data) {
         return joinMessages(errors.response.data)
       }
-      return 'Something goes wrong'
     }
     return 'Something goes wrong'
   }

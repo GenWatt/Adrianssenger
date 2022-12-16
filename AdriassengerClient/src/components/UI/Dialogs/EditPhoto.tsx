@@ -1,6 +1,6 @@
 import { Avatar, Dialog, DialogContent, DialogTitle, Grid, useTheme } from '@mui/material'
 import { useSnackbar } from 'notistack'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserHeaderData } from '../../../global'
 import useFetch from '../../../hooks/useFetch'
 import useFile from '../../../hooks/useFile'
@@ -26,8 +26,9 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
       e.preventDefault()
       const res = await request<UserHeaderData>('/Users/' + user.id, 'PUT', new FormData(e.target as HTMLFormElement))
       updateUser(res.data)
+      enqueueSnackbar('Updated photo!', { variant: 'success' })
     } catch (error) {
-      enqueueSnackbar('Could not update photo')
+      enqueueSnackbar('Could not update photo', { variant: 'error' })
     }
   }
 
@@ -52,7 +53,7 @@ export default function EditPhoto({ isOpen, handleClose }: EditPhotoProps) {
           ></Avatar>
         </Grid>
 
-        <Form schema={schema} onSubmit={handleSubmit} onFileChange={handleFileChange} showPreview={false} />
+        <Form fullWidth schema={schema} onSubmit={handleSubmit} onFileChange={handleFileChange} showPreview={false} />
       </DialogContent>
     </Dialog>
   )

@@ -15,7 +15,7 @@ const schema: FormSchema[] = [
 export default function Login() {
   const { request, isLoading, getErrorMessage } = useFetch()
   const { convertFormDataToObject } = useForm()
-  const { updateUser } = useUser()
+  const { login } = useUser()
   const navigate = useNavigate()
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -25,10 +25,9 @@ export default function Login() {
       const loginData = convertFormDataToObject<{ userName: string; password: string }>(e.target as HTMLFormElement)
       const res = await request<UserHeaderData>('/Account/Login', 'POST', loginData)
 
-      updateUser(res.data)
+      login(res.data)
       navigate('/')
     } catch (error) {
-      console.log(error)
       setErrorMessage(getErrorMessage(error))
     }
   }

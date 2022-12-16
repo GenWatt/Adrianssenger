@@ -75,7 +75,7 @@ namespace AdriassengerApi.Controllers
                 if (currentUser is null)
                 {
                     ModelState.AddModelError("UserName", "Invalid Login attempt.");
-                    return Conflict(ModelState.Values.SelectMany(v => v.Errors));
+                    return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
                 }
 
                 var accessToken = _tokenManager.GetAccessToken(currentUser);
@@ -102,7 +102,7 @@ namespace AdriassengerApi.Controllers
 
             if (currentUser is not null && BCrypt.Net.BCrypt.Verify(user.Password, currentUser.Password)) return currentUser;
 
-            return currentUser;
+            return null;
         }
 
         [HttpPost("Refresh")]

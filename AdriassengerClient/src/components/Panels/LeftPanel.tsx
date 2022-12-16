@@ -26,7 +26,7 @@ export default function LeftPanel() {
   const handleSearchFriend = (e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)
 
   return (
-    <Grid className={classes.root} xs={12} md={4}>
+    <Grid item className={classes.root} xs={12} md={4}>
       <UserInfo user={user} />
       <FrindOptions handleSearch={handleSearchFriend} searchText={searchText} />
       <FriendList searchText={searchText} />

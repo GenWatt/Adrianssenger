@@ -22,7 +22,7 @@
 
         public async Task<FileSavedResponse> SaveAvatar(IFormFile file)
         {
-            var staticFolderPath = Path.Combine("wwwroot", AvatarFolderName);
+            var staticFolderPath = GetAvatarPath();
 
             if (!Directory.Exists(staticFolderPath))
             {

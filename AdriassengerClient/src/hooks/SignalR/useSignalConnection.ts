@@ -1,7 +1,7 @@
 import useSignalR from './useSignalR'
 import useFriends from '../../components/Friends/useFriends'
 import useNotifications from '../../components/Notifications/useNotifications'
-import useMessage from '../../components/Messages/useMessage'
+import useMessage from '../../components/Message/useMessage'
 import { Message } from '../../global'
 
 export default function useSignalConnection() {

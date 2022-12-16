@@ -12,7 +12,6 @@ export default function UserMenu({ isShow, closeMenu }: UserMenuProps) {
       <DialogTitle color={theme.palette.text.secondary}>Quick Options</DialogTitle>
       <DialogContent>
         <MenuList>
-          <MenuItem>Setting</MenuItem>
           <MenuItem onClick={logout}>Log out</MenuItem>
         </MenuList>
       </DialogContent>

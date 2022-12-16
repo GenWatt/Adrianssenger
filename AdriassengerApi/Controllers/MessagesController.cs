@@ -50,7 +50,6 @@ namespace AdriassengerApi.Controllers
             return Ok(new SuccessResponse<List<Messages>> {  Message = "Successfully recvied massages", Data = messages });
         }
 
-        // POST api/<MessagesController>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> Post([FromBody] MessageView message)
@@ -107,7 +106,6 @@ namespace AdriassengerApi.Controllers
             NotFound("Not found unseen message");
         }
 
-        // DELETE api/<MessagesController>/5
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)
