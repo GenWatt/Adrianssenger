@@ -1,4 +1,4 @@
-import { FormControl, Grid, Input, InputProps, useTheme } from '@mui/material'
+import { FormControl, Input, InputProps, useTheme } from '@mui/material'
 import React, { CSSProperties, useRef } from 'react'
 import FileButton from '../UI/Buttons/FileButton'
 import FormErrors from './FormErrors'
@@ -34,12 +34,9 @@ export default function FileInput({
   return (
     <FormControl style={controllStyles}>
       <label htmlFor={id} onClick={focusOnInput}>
-        {preview && (
-          <Grid my={1} container justifyContent="center">
-            <img style={{ width: theme.spacing(20) }} src={preview} alt="preview" />
-          </Grid>
-        )}
-        <FileButton style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }}>{label}</FileButton>
+        <FileButton style={{ marginTop: theme.spacing(1), marginBottom: theme.spacing(1) }}>
+          {!preview ? label : <img style={{ width: '90%' }} src={preview}></img>}
+        </FileButton>
         <Input
           ref={inputRef}
           style={{ display: 'none' }}

@@ -9,7 +9,6 @@ type FileButtonProps = {
 const useStyles = makeStyles()((theme: Theme) => ({
   button: {
     border: `${theme.spacing(0.3)} dashed ${theme.palette.primary.main}`,
-    padding: theme.spacing(1),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

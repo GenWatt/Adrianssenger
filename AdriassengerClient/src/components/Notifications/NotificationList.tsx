@@ -1,4 +1,4 @@
-import { Grid, List, Typography } from '@mui/material'
+import { Grid, List } from '@mui/material'
 import { NotificationState } from '../../global'
 import NotificationItem from './NotificationItem'
 import NotFound from '../UI/NotFound/NotFound'

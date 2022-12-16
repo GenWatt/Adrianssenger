@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "kIEBZiVEFeTDUMiMg15arEqobGbrcI7oEquDuN7z48w=",
+  "Hash": "5KnHOKuygom25gb89xqFvvyDiDi6prvyOlQZoh6S2Mg=",
   "Source": "AdriassengerApi",
   "BasePath": "_content/AdriassengerApi",
   "Mode": "Default",
@@ -15,5 +15,40 @@
       "Pattern": "**"
     }
   ],
-  "Assets": []
+  "Assets": [
+    {
+      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png",
+      "SourceId": "AdriassengerApi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
+      "BasePath": "_content/AdriassengerApi",
+      "RelativePath": "Avatars/7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Avatars\\7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png"
+    },
+    {
+      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\c678594e-d7e9-46c9-8497-7ca8f5066b352020-12-05 (1).png",
+      "SourceId": "AdriassengerApi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
+      "BasePath": "_content/AdriassengerApi",
+      "RelativePath": "Avatars/c678594e-d7e9-46c9-8497-7ca8f5066b352020-12-05 (1).png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Avatars\\c678594e-d7e9-46c9-8497-7ca8f5066b352020-12-05 (1).png"
+    }
+  ]
 }

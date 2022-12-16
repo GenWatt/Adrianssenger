@@ -13,9 +13,7 @@ export default function useNotifications() {
       if (response) {
         setNotificationStore(() => ({ notifications: response.data }))
       }
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   const deleteNotificationApi = async (id: number) => {

@@ -1,4 +1,4 @@
-import { atom, selector } from 'recoil'
+import { atom } from 'recoil'
 import { UserHeaderData } from '../global'
 
 export const initialUserValue: UserHeaderData = {
@@ -12,12 +12,4 @@ export const initialUserValue: UserHeaderData = {
 export const userState = atom<UserHeaderData>({
   key: 'userState',
   default: initialUserValue,
-})
-
-export const isAuthenticate = selector({
-  key: 'isAuth',
-  get: ({ get }) => {
-    const user = get(userState)
-    return user && Boolean(user.id)
-  },
 })
