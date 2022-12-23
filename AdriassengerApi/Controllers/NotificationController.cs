@@ -1,7 +1,6 @@
-﻿using AdriassengerApi.Data;
-using AdriassengerApi.Models.Notifications;
+﻿using AdriassengerApi.Models.Notifications;
 using AdriassengerApi.Models.Responses;
-using AdriassengerApi.Repository.NotificationsRepo;
+using AdriassengerApi.Repository;
 using AdriassengerApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +12,10 @@ namespace AdriassengerApi.Controllers
     [ApiController]
     public class NotificationController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        private readonly INotificationsRepository _notificationRepository;
-        public NotificationController(ApplicationContext context, INotificationsRepository notificationsRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public NotificationController(IUnitOfWork unitOfWork)
         {
-            _context = context;
-            _notificationRepository = notificationsRepository;  
+            _unitOfWork = unitOfWork;  
         }
 
         // GET: api/<NotificationController>
@@ -28,7 +25,7 @@ namespace AdriassengerApi.Controllers
         {
             var currentUser = UserManager.GetCurrentUser(HttpContext);
             if (currentUser is null) return Unauthorized("Can not send notifications user unauthorized");
-            var notifications = await _context.Notifications.Where(n => n.UserId == currentUser.Id && n.Seen == false).OrderBy(n => n.CreatedAt).ToListAsync();
+            var notifications = await _unitOfWork.Notifications.GetWhere(n => n.UserId == currentUser.Id && n.Seen == false).OrderBy(n => n.CreatedAt).ToListAsync();
 
             return Ok(new SuccessResponse<List<Notification>> { Message = "Notifications sended", Data = notifications });
         }
@@ -38,8 +35,8 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<ActionResult<SuccessResponse<string>>> Post([FromBody] Notification notification)
         {
-            _notificationRepository.Add(notification);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Notifications.Add(notification);
+            await _unitOfWork.Save();
             return Ok(new SuccessResponse<string> { Message = "Notification sent", Data = "" });
         }
 
@@ -48,15 +45,15 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var notification = await _notificationRepository.GetById(id);
+            var notification = await _unitOfWork.Notifications.GetById(id);
 
             if (notification is null)
             {
                 return NotFound("Notification not found to delete");
             }
 
-            _notificationRepository.Remove(notification);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Notifications.Remove(notification);
+            await _unitOfWork.Save();
 
             return NoContent();
         }

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AdriassengerApi.Data;
 using Microsoft.AspNetCore.Authorization;
 using AdriassengerApi.Services;
 using AdriassengerApi.Models.UserModels;
-using AdriassengerApi.Repository.UserRepo;
 using AdriassengerApi.Models.Responses;
+using AdriassengerApi.Repository;
+using Microsoft.EntityFrameworkCore;
+using AdriassengerApi.Data;
 
 namespace AdriassengerApi.Controllers
 {
@@ -13,15 +13,15 @@ namespace AdriassengerApi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationContext _context;
         private readonly IStaticFiles _staticFiles;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationContext _context;
 
-        public UsersController(ApplicationContext context, IStaticFiles staticFiles, IUserRepository userRepository)
+        public UsersController(IStaticFiles staticFiles, IUnitOfWork unitOfWork, ApplicationContext context)
         {
-            _context = context;
             _staticFiles = staticFiles;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         // GET: api/Users
@@ -32,9 +32,9 @@ namespace AdriassengerApi.Controllers
             var currentUser = UserManager.GetCurrentUser(HttpContext);
             if (currentUser is null) return Unauthorized("User not log in");
             var users = await (from u in _context.Users
-                        where u.Id != currentUser.Id && u.UserName.Contains(searchText) &&
-                        !_context.friends.Any(f => (currentUser.Id == f.UserId && f.SecondUserId == u.Id) || (f.UserId == u.Id && currentUser.Id == f.SecondUserId))
-                        select new SearchUser { Id = u.Id, UserName = u.UserName }).ToArrayAsync();
+                               where u.Id != currentUser.Id && u.UserName.Contains(searchText) &&
+                               !_context.friends.Any(f => (currentUser.Id == f.UserId && f.SecondUserId == u.Id) || (f.UserId == u.Id && currentUser.Id == f.SecondUserId))
+                               select new SearchUser { Id = u.Id, UserName = u.UserName }).ToArrayAsync();
 
             return Ok(new SuccessResponse<IEnumerable<SearchUser>> { Message = "Users sended", Data = users });
         }
@@ -44,7 +44,7 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<IActionResult> PutUser(int id, [FromForm] EditUserView user)
         {
-            var currentUser = await _userRepository.GetById(id);
+            var currentUser = await _unitOfWork.Users.GetById(id);
 
             if (currentUser is null) return NotFound("Not found user to update");
 
@@ -60,8 +60,8 @@ namespace AdriassengerApi.Controllers
                 if (response.Success) currentUser.AvatarUrl = response.Path;
             }
 
-            _userRepository.Update(currentUser);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Users.Update(currentUser);
+            await _unitOfWork.Save();
             
             return Ok(new SuccessResponse<UserWithoutCredentials> { Message = "Successfully edited user", Data = new UserWithoutCredentials(currentUser) });
         }
@@ -70,15 +70,15 @@ namespace AdriassengerApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _userRepository.GetById(id);
+            var user = await _unitOfWork.Users.GetById(id);
 
-            if (user == null)
+            if (user is null)
             {
                 return NotFound("Not found user to delete");
             }
 
-            _userRepository.Remove(user);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Users.Remove(user);
+            await _unitOfWork.Save();
 
             return NoContent();
         }

@@ -7,6 +7,7 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
+using AdriassengerApi.Repository;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -58,6 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IFriendRepository, FriendRepository>();
             services.AddTransient<INotificationsRepository, NotificationsRepository>();
             services.AddTransient<IMessagesRepository, MessagesRepository>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             // other services
             services.AddSingleton<ITokenManager, TokenManager>();
             services.AddSingleton<IStaticFiles, StaticFiles>();

@@ -13,22 +13,29 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _context.Set<T>().Add(entity);
     }
-
-    public async void Update(T entity) 
+    public IQueryable<T> GetWhere(Expression<Func<T, bool>> expression)
     {
-        _context.Set<T>().Update(entity);
+        return _context.Set<T>().Where(expression);
+    }
+    public void Update(T entity) 
+    {
+        _context.Entry(entity).State = EntityState.Modified;
     }
     public void AddRange(IEnumerable<T> entities)
     {
         _context.Set<T>().AddRange(entities);
     }
-    public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
+    public async Task<T?> FindOne(Expression<Func<T, bool>> expression)
     {
-        return _context.Set<T>().Where(expression);
+        return await _context.Set<T>().FirstOrDefaultAsync(expression);
     }
-    public IEnumerable<T> GetAll()
+    public IQueryable<T> GetAll()
     {
-        return _context.Set<T>().ToList();
+        return _context.Set<T>();
+    }
+    public bool Any(Expression<Func<T, bool>> expression)
+    {
+        return _context.Set<T>().Any(expression);
     }
     public async Task<T?> GetById(int id)
     {
@@ -41,14 +48,5 @@ public class Repository<T> : IRepository<T> where T : class
     public void RemoveRange(IEnumerable<T> entities)
     {
         _context.Set<T>().RemoveRange(entities);
-    }
-    public void UpdateAsync(T entity)
-    {
-        _context.Entry(entity).State = EntityState.Modified;
-    }
-
-    public async Task SaveAsync()
-    {
-        await _context.SaveChangesAsync();
     }
 }

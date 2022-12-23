@@ -1,11 +1,9 @@
-﻿using AdriassengerApi.Data;
-using AdriassengerApi.Models.Responses;
+﻿using AdriassengerApi.Models.Responses;
 using AdriassengerApi.Models.UserModels;
-using AdriassengerApi.Repository.UserRepo;
+using AdriassengerApi.Repository;
 using AdriassengerApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AdriassengerApi.Controllers
 {
@@ -13,17 +11,15 @@ namespace AdriassengerApi.Controllers
     [ApiController]
     public class AccountController : Controller
     {
-        private readonly ApplicationContext _context;
         private readonly ITokenManager _tokenManager;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IStaticFiles _staticFiles;
         private readonly IConfiguration _config;
 
-        public AccountController(ApplicationContext context, ITokenManager tokenManager, IUserRepository userRepository, IStaticFiles staticFiles, IConfiguration config)
+        public AccountController( ITokenManager tokenManager, IUnitOfWork unitOfWork, IStaticFiles staticFiles, IConfiguration config)
         {
-            _context = context;
             _tokenManager = tokenManager;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _staticFiles = staticFiles;
             _config = config;
         }
@@ -34,7 +30,7 @@ namespace AdriassengerApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userExists = await _context.Users.FirstOrDefaultAsync(u => u.UserName == model.UserName || u.Email == model.Email);
+                var userExists = await _unitOfWork.Users.FindOne(u => u.UserName == model.UserName || u.Email == model.Email);
 
                 if (userExists is not null)
                 {
@@ -56,8 +52,8 @@ namespace AdriassengerApi.Controllers
                     if (response.Success) user.AvatarUrl = response.Path;
                 }
 
-                _userRepository.Add(user);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Users.Add(user);
+                await _unitOfWork.Save();
 
                 return new SuccessResponse<User> { Message = "Successfully registered", Data = user };
             }
@@ -88,8 +84,8 @@ namespace AdriassengerApi.Controllers
 
                 SetTokensToCookies(accessToken, refreshToken);
 
-                _userRepository.Update(currentUser);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Users.Update(currentUser);
+                await _unitOfWork.Save();
 
                 return Ok(new SuccessResponse<UserWithoutCredentials> { Message = "Successfully log in", Data = new UserWithoutCredentials(currentUser) });
             }
@@ -98,7 +94,7 @@ namespace AdriassengerApi.Controllers
 
         private async Task<User?> GetUserFromCredentials(LoginView user)
         {
-            var currentUser = await _userRepository.GetByUsername(user.UserName);
+            var currentUser = await _unitOfWork.Users.GetByUsername(user.UserName);
 
             if (currentUser is not null && BCrypt.Net.BCrypt.Verify(user.Password, currentUser.Password)) return currentUser;
 
@@ -110,7 +106,7 @@ namespace AdriassengerApi.Controllers
         public async Task<ActionResult<SuccessResponse<string>>> RefreshToken()
         {
             var refreshToken = Request.Cookies["RefreshToken"];
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            var currentUser = await _unitOfWork.Users.FindOne(u => u.RefreshToken == refreshToken);
 
             if (refreshToken is not null && currentUser is not null && currentUser.RefreshTokenExpirationDate > DateTime.Now && currentUser.IsAccessTokenValid)
             {
@@ -124,8 +120,8 @@ namespace AdriassengerApi.Controllers
 
                 SetTokensToCookies(newAccessToken, newRefreshToken);
 
-                _userRepository.Update(currentUser);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Users.Update(currentUser);
+                await _unitOfWork.Save();
 
                 return Ok(new SuccessResponse<string> { Data = "Refresh Token", Message = "Success" });
             }
@@ -139,7 +135,7 @@ namespace AdriassengerApi.Controllers
         {
             if (Request.Cookies.ContainsKey("AccessToken"))
             {
-                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.AccessToken == Request.Cookies["AccessToken"]);
+                var currentUser = await _unitOfWork.Users.FindOne(u => u.AccessToken == Request.Cookies["AccessToken"]);
 
                 if (currentUser is null) return Unauthorized();
 
@@ -150,14 +146,13 @@ namespace AdriassengerApi.Controllers
 
                 SetTokensToCookies("", "");
 
-                _userRepository.Update(currentUser);
-                await _context.SaveChangesAsync();
+                _unitOfWork.Users.Update(currentUser);
+                await _unitOfWork.Save();
 
                 return Ok(new SuccessResponse<string> { Data = "Log out", Message = "Successully log out"});
             }
             return Unauthorized();
         }   
-
         private void SetTokensToCookies(string accessToken, string refreshToken)
         {
             Response.Cookies.Append("AccessToken", accessToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None, IsEssential = true });

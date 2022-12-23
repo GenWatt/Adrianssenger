@@ -4,12 +4,11 @@ using AdriassengerApi.Data;
 using AdriassengerApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using AuthorizeAttribute = Microsoft.AspNetCore.Authorization.AuthorizeAttribute;
-using AdriassengerApi.Repository.FriendRepo;
-using AdriassengerApi.Repository.NotificationsRepo;
 using AdriassengerApi.Services;
 using AdriassengerApi.Models.Friends;
 using AdriassengerApi.Models.Notifications;
 using AdriassengerApi.Models.Responses;
+using AdriassengerApi.Repository;
 
 namespace AdriassengerApi.Controllers
 {
@@ -17,19 +16,14 @@ namespace AdriassengerApi.Controllers
     [ApiController]
     public class FriendsController : ControllerBase
     {
-        private readonly ApplicationContext _context;
         private readonly IHubContext<FriendHub, IFriendHub> _chatHub;
-        private readonly IFriendRepository _friendRepository;
-        private readonly INotificationsRepository _notificationRepository;
-        public FriendsController(ApplicationContext context, 
-                IHubContext<FriendHub, IFriendHub> chatHub, 
-                IFriendRepository friendRepository, 
-                INotificationsRepository notificationRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationContext _context;
+        public FriendsController(IHubContext<FriendHub, IFriendHub> chatHub, IUnitOfWork unitOfWork, ApplicationContext context)
         {
-            _context = context;
             _chatHub = chatHub;
-            _friendRepository = friendRepository;
-            _notificationRepository = notificationRepository;   
+            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         // GET: api/Friends
@@ -60,16 +54,16 @@ namespace AdriassengerApi.Controllers
 
             if (user is null) return Unauthorized();
 
-            var isAlreadyFriend = await _context.friends.FirstOrDefaultAsync(f => f.SecondUserId == friend.SecondUserId && f.UserId == user.Id || f.UserId == friend.SecondUserId && f.SecondUserId == user.Id);
+            var isAlreadyFriend = await _unitOfWork.Friends.FindOne(f => f.SecondUserId == friend.SecondUserId && f.UserId == user.Id || f.UserId == friend.SecondUserId && f.SecondUserId == user.Id);
 
             if (isAlreadyFriend is not null) return Conflict("You are already friends");
 
             newFriend.UserId = user.Id;
             newFriend.SecondUserId = friend.SecondUserId;
 
-            _friendRepository.Add(newFriend);
+            _unitOfWork.Friends.Add(newFriend);
 
-            await _friendRepository.SaveAsync();
+            await _unitOfWork.Save();
 
             var notification = new Notification
             {
@@ -85,9 +79,9 @@ namespace AdriassengerApi.Controllers
                 ActionId = newFriend.FriendId
             };
 
-            _notificationRepository.Add(notification);
+            _unitOfWork.Notifications.Add(notification);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Save();
             await _chatHub.Clients.Group($"user_{friend.SecondUserId}").SendFriendRequest(notification);
 
             return CreatedAtAction("GetFriend", new { id = newFriend.FriendId }, friend);
@@ -107,15 +101,15 @@ namespace AdriassengerApi.Controllers
             if (data is not null && data.Friend is null) return NotFound("Not found friend data");
             data.Friend.RequestAccepted = true;
 
-            _friendRepository.Update(data.Friend);
-            var friendRequestNotification = await _context.Notifications.FirstOrDefaultAsync(n => n.ActionId == id);
+            _unitOfWork.Friends.Update(data.Friend);
+            var friendRequestNotification = await _unitOfWork.Notifications.FindOne(n => n.ActionId == id);
 
             if (friendRequestNotification != null)
             {
-               _notificationRepository.Remove(friendRequestNotification);
+                _unitOfWork.Notifications.Remove(friendRequestNotification);
             }
 
-             await _context.SaveChangesAsync();
+             await _unitOfWork.Save();
              await _chatHub.Clients.Group($"user_{data.Friend.UserId}").SendFriendRequestAccept(new FriendResponse(data.Friend, data.CurrentUser));
              await _chatHub.Clients.Group($"user_{data.Friend.SecondUserId}").SendFriendRequestAccept(new FriendResponse(data.Friend, data.Sender));
           
@@ -129,13 +123,13 @@ namespace AdriassengerApi.Controllers
             var friendData = await _context.friends.Include(f => f.SecondUser).FirstOrDefaultAsync(f => f.FriendId == id);
             if (friendData is null) return NotFound("Friend not found");
 
-            _friendRepository.Remove(friendData);
+            _unitOfWork.Friends.Remove(friendData);
 
-            var friendRequestNotification = await _context.Notifications.FirstOrDefaultAsync(n => n.ActionId == id);
+            var friendRequestNotification = await _unitOfWork.Notifications.FindOne(n => n.ActionId == id);
 
             if (friendRequestNotification != null)
             {
-                _notificationRepository.Remove(friendRequestNotification);
+                _unitOfWork.Notifications.Remove(friendRequestNotification);
             }
 
             var notification = new Notification
@@ -145,12 +139,12 @@ namespace AdriassengerApi.Controllers
                 UserId = friendData.UserId,
             };
 
-            _notificationRepository.Add(notification);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Notifications.Add(notification);
+            await _unitOfWork.Save();
             await _chatHub.Clients.Group($"user_{friendData.UserId}").SendFriendRequestReject(notification);
             if (friendRequestNotification is not null) await _chatHub.Clients.Group($"user_{friendData.SecondUserId}").RemoveNotification(friendRequestNotification.Id);
 
-            return Ok(new SuccessResponse<int> {  Message = "Friends request rejected!", Data = id});
+            return Ok(new SuccessResponse<int> { Message = "Friends request rejected!", Data = id});
         }
 
         // DELETE: api/Friends/5
@@ -158,16 +152,16 @@ namespace AdriassengerApi.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteFriend(int id)
         {
-            var friend = await _friendRepository.GetById(id);
+            var friend = await _unitOfWork.Friends.GetById(id);
 
             if (friend is null)
             {
                 return NotFound("Friend not found to delete");
             }
 
-            _friendRepository.Remove(friend);
+            _unitOfWork.Friends.Remove(friend);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Save();
             await _chatHub.Clients.Group($"user_{friend.SecondUserId}").RemoveFriend(id);
             await _chatHub.Clients.Group($"user_{friend.UserId}").RemoveFriend(id);
 
