@@ -26,7 +26,7 @@ namespace AdriassengerApi.Controllers
 
         [HttpPost("Register")]
         [AllowAnonymous]
-        public async Task<ActionResult<SuccessResponse<User>>> Register([FromForm] UserView model)
+        public async Task<ActionResult<SuccessResponse<string>>> Register([FromForm] UserRequest model)
         {
             if (ModelState.IsValid)
             {
@@ -55,14 +55,14 @@ namespace AdriassengerApi.Controllers
                 _unitOfWork.Users.Add(user);
                 await _unitOfWork.Save();
 
-                return new SuccessResponse<User> { Message = "Successfully registered", Data = user };
+                return new SuccessResponse<string> { Message = "Successfully registered", Data = $"{user.UserName} registered" };
             }
             return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
         }
 
         [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<SuccessResponse<UserWithoutCredentials>>> Login(LoginView user)
+        public async Task<ActionResult<SuccessResponse<UserWithoutCredentials>>> Login(LoginRequest user)
         {
             if (ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace AdriassengerApi.Controllers
             return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
         }
 
-        private async Task<User?> GetUserFromCredentials(LoginView user)
+        private async Task<User?> GetUserFromCredentials(LoginRequest user)
         {
             var currentUser = await _unitOfWork.Users.GetByUsername(user.UserName);
 

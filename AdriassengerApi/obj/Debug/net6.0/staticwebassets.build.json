@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Y5rprO+eGO+h7swKAgPoQRVICQplehb+H5IG5P6aFaA=",
+  "Hash": "BhJnfmyNRmlXEoy5eLO6jQU12Xydro2cCglV5nlWta4=",
   "Source": "AdriassengerApi",
   "BasePath": "_content/AdriassengerApi",
   "Mode": "Default",
@@ -16,6 +16,23 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\1a5831c4-ac1b-4e17-910f-0dbb63067278bg.jpg",
+      "SourceId": "AdriassengerApi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
+      "BasePath": "_content/AdriassengerApi",
+      "RelativePath": "Avatars/1a5831c4-ac1b-4e17-910f-0dbb63067278bg.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Avatars\\1a5831c4-ac1b-4e17-910f-0dbb63067278bg.jpg"
+    },
     {
       "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\67d90d1d-85c6-49bf-8f26-767de60b834f2021-02-11.png",
       "SourceId": "AdriassengerApi",
@@ -34,12 +51,12 @@
       "OriginalItemSpec": "wwwroot\\Avatars\\67d90d1d-85c6-49bf-8f26-767de60b834f2021-02-11.png"
     },
     {
-      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png",
+      "Identity": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\Avatars\\9c83759d-4bdd-4682-ae82-85c5fdf7ebbefizyka cw1.png",
       "SourceId": "AdriassengerApi",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\Praca\\Adriassenger\\AdriassengerApi\\wwwroot\\",
       "BasePath": "_content/AdriassengerApi",
-      "RelativePath": "Avatars/7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png",
+      "RelativePath": "Avatars/9c83759d-4bdd-4682-ae82-85c5fdf7ebbefizyka cw1.png",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -48,7 +65,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\Avatars\\7bc14fb7-56c4-4ce7-8e93-db9baa7044662020-11-26.png"
+      "OriginalItemSpec": "wwwroot\\Avatars\\9c83759d-4bdd-4682-ae82-85c5fdf7ebbefizyka cw1.png"
     }
   ]
 }

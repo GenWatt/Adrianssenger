@@ -15,14 +15,10 @@ namespace AdriassengerApi.Repository
             _context = context;
         }
 
-        private IUserRepository _users;
-        public IUserRepository Users => _users ?? new UserRepository(_context);
-        private INotificationsRepository _notifications;
-        public INotificationsRepository Notifications => _notifications ?? new NotificationsRepository(_context);
-        private IMessagesRepository _messages;
-        public IMessagesRepository Messages => _messages ?? new MessagesRepository(_context);
-        private IFriendRepository _friends;
-        public IFriendRepository Friends => _friends ?? new FriendRepository(_context);
+        public IUserRepository Users => new UserRepository(_context);
+        public INotificationsRepository Notifications => new NotificationsRepository(_context);
+        public IMessagesRepository Messages => new MessagesRepository(_context);
+        public IFriendRepository Friends => new FriendRepository(_context);
 
         public async Task Save()
         {

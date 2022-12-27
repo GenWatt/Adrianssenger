@@ -18,6 +18,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyProductAttribute("AdriassengerApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AdriassengerApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Adrianssenger.Test")]
 
 // Wygenerowane przez klasę WriteCodeFragment programu MSBuild.
 

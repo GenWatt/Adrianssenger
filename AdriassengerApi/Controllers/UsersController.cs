@@ -32,7 +32,7 @@ namespace AdriassengerApi.Controllers
             var currentUser = UserManager.GetCurrentUser(HttpContext);
             if (currentUser is null) return Unauthorized("User not log in");
             var users = await (from u in _context.Users
-                               where u.Id != currentUser.Id && u.UserName.Contains(searchText) &&
+                               where u.Id != currentUser.Id && u.UserName.ToLower().Contains(searchText.ToLower()) &&
                                !_context.friends.Any(f => (currentUser.Id == f.UserId && f.SecondUserId == u.Id) || (f.UserId == u.Id && currentUser.Id == f.SecondUserId))
                                select new SearchUser { Id = u.Id, UserName = u.UserName }).ToArrayAsync();
 
